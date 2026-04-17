@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+.env
+.env.local
+
+# Build outputs
+dist/
+*.log
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Machine-specific
+.wrangler/
+.tanstack/
+
+# Vercel
+.vercel
+
+# Project-specific

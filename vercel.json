@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "projects": [
+    {
+      "name": "dr-barkot-ali",
+      "rootDirectory": "barkatali-5b74b618",
+      "buildCommand": "npm run build",
+      "devCommand": "npm run dev",
+      "outputDirectory": "dist"
+    }
+  ]
+}
