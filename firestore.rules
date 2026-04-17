@@ -1,11 +1,21 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default: allow reads but deny writes.
-    // Change write rules only when you configure Firebase Authentication.
-    match /{document=**} {
+
+    // Rule 1: Site Data (site/main)
+    // This is the main document for your website's content.
+    // Allow anyone to read it (public access for visitors).
+    // Only allow authenticated users to write to it (your admin panel).
+    match /site/{document=**} {
       allow read: if true;
-      allow write: if false;
+      allow write: if request.auth != null;
+    }
+
+    // Rule 2: Patients Collection
+    // This is for the test "Patients" section in the admin panel.
+    // Only authenticated users should be able to read or write here.
+    match /patients/{patientId} {
+      allow read, write: if request.auth != null;
     }
   }
 }

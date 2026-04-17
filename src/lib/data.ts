@@ -1,5 +1,8 @@
-// Firebase-ready data abstraction layer
-// Replace getData/setData internals with Firestore calls later
+// src/lib/data.ts
+// Firebase-powered data abstraction layer
+
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db } from "./firebase";
 
 export interface DoctorInfo {
   name: string;
@@ -128,48 +131,53 @@ const DEFAULT_DATA: SiteData = {
   },
 };
 
-const STORAGE_KEY = "drbarkat_site_data";
+// The document where all site data is stored in Firestore
+const siteDataRef = doc(db, "site", "main");
 
-// Migrate old shape → new shape
-function migrate(parsed: Partial<SiteData> & { contact?: Partial<ContactInfo> & { whatsapp?: string } }): SiteData {
-  const merged: SiteData = {
-    ...DEFAULT_DATA,
-    ...parsed,
-    contact: { ...DEFAULT_DATA.contact, ...(parsed.contact || {}) },
-    settings: { ...DEFAULT_DATA.settings, ...(parsed.settings || {}) },
-    memberships: parsed.memberships ?? DEFAULT_DATA.memberships,
-    gallery: parsed.gallery ?? DEFAULT_DATA.gallery,
-  };
-  // Migrate single whatsapp → array
-  if (parsed.contact?.whatsapp && (!parsed.contact.whatsappNumbers || parsed.contact.whatsappNumbers.length === 0)) {
-    merged.contact.whatsappNumbers = [parsed.contact.whatsapp];
-  }
-  if (!Array.isArray(merged.contact.whatsappNumbers)) merged.contact.whatsappNumbers = DEFAULT_DATA.contact.whatsappNumbers;
-  if (!Array.isArray(merged.contact.phoneNumbers)) merged.contact.phoneNumbers = DEFAULT_DATA.contact.phoneNumbers;
-  return merged;
-}
-
-export function getData(): SiteData {
-  if (typeof window === "undefined") return DEFAULT_DATA;
+/**
+ * Fetches the site data from Firestore.
+ * If no data is found, it returns the default data.
+ */
+export async function getData(): Promise<SiteData> {
   try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) return migrate(JSON.parse(stored));
-  } catch {
-    // ignore
+    const docSnap = await getDoc(siteDataRef);
+    if (docSnap.exists()) {
+      const firestoreData = docSnap.data() as Partial<SiteData>;
+      // Merge with default to ensure all fields are present
+      return { ...DEFAULT_DATA, ...firestoreData };
+    } else {
+      console.log("No site data found in Firestore, using default data.");
+      return DEFAULT_DATA;
+    }
+  } catch (error) {
+    console.error("Error fetching site data from Firestore:", error);
+    return DEFAULT_DATA;
   }
-  return DEFAULT_DATA;
 }
 
-export function setData(data: SiteData): void {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-  window.dispatchEvent(new CustomEvent("siteDataUpdated", { detail: data }));
+/**
+ * Saves the entire site data object to Firestore.
+ * @param data The complete site data to save.
+ */
+export async function setData(data: SiteData): Promise<void> {
+  try {
+    await setDoc(siteDataRef, data, { merge: true });
+  } catch (error) {
+    console.error("Error saving site data to Firestore:", error);
+    throw new Error("Failed to save data.");
+  }
 }
 
-export function resetData(): void {
-  if (typeof window === "undefined") return;
-  localStorage.removeItem(STORAGE_KEY);
-  window.dispatchEvent(new CustomEvent("siteDataUpdated", { detail: DEFAULT_DATA }));
+/**
+ * Resets the site data in Firestore to the default values.
+ */
+export async function resetData(): Promise<void> {
+  try {
+    await setDoc(siteDataRef, DEFAULT_DATA);
+  } catch (error) {
+    console.error("Error resetting site data in Firestore:", error);
+    throw new Error("Failed to reset data.");
+  }
 }
 
 export function getDefaultData(): SiteData {
