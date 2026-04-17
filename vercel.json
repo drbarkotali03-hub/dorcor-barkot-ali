@@ -1,6 +1,5 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/server",
-  "installCommand": "npm install",
-  "public": "dist/client"
+  "buildCommand": "npm run build && cp dist/client/index.html dist/client/404.html",
+  "outputDirectory": "dist/client",
+  "installCommand": "npm install"
 }
