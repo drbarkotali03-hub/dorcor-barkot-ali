@@ -1,1 +1,0 @@
-# dorcor-barkot-ali
