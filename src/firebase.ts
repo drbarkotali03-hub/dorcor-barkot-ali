@@ -1,21 +1,21 @@
-// src/firebase.ts
-import { initializeApp, getApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 
-// Your web app's Firebase configuration
+import { initializeApp, getApps } from "firebase/app";
+import { getFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBOIyDRJ8WFswTudCGNfDoCa7sw82kUeek",
-  authDomain: "de-barkot-ali-web.firebaseapp.com",
-  databaseURL: "https://de-barkot-ali-web-default-rtdb.firebaseio.com",
-  projectId: "de-barkot-ali-web",
-  storageBucket: "de-barkot-ali-web.appspot.com",
-  messagingSenderId: "392212737235",
-  appId: "1:392212737235:web:9018d9f385f4332ce17826",
-  measurementId: "G-EFFCTX7JEW"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
-const db = getFirestore(app);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 
-export { app, db };
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+export { db, auth };

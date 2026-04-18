@@ -1,3 +1,4 @@
+
 import { motion } from "framer-motion";
 import { GraduationCap, Briefcase, Heart, Stethoscope, ShieldCheck, Baby, Thermometer, TrendingUp, Apple, MessageCircle, Award } from "lucide-react";
 import type { SiteData } from "@/lib/data";
@@ -62,7 +63,7 @@ export function QualificationsSection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Academic excellence from renowned institutions</p>
         </div>
         <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-          {(data?.qualifications || []).map((q, i) => (
+          {data?.qualifications?.map((q, i) => (
             <motion.div
               key={q}
               custom={i}
@@ -92,7 +93,7 @@ export function MembershipSection({ data }: { data: SiteData }) {
         <p className="section-subtitle">Professional affiliations & memberships</p>
       </div>
       <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-        {(data?.memberships || []).map((m, i) => (
+        {data?.memberships?.map((m, i) => (
           <motion.div
             key={m + i}
             custom={i}
@@ -103,7 +104,7 @@ export function MembershipSection({ data }: { data: SiteData }) {
             className="glass-card flex items-center gap-4 p-6 transition-all hover:shadow-lg hover:-translate-y-0.5"
           >
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
-              <Award className="h-5 w-5" />
+                <Award className="h-5 w-5" />
             </div>
             <span className="font-bold text-foreground">{m}</span>
           </motion.div>
@@ -122,7 +123,7 @@ export function GallerySection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Moments from our practice</p>
         </div>
         <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {(data?.gallery || []).map((item, i) => (
+          {data?.gallery?.map((item, i) => (
             <motion.figure
               key={item.id}
               custom={i}
@@ -163,7 +164,7 @@ export function ExperienceSection({ data }: { data: SiteData }) {
         <p className="section-subtitle">A distinguished career in pediatric medicine</p>
       </div>
       <div className="mx-auto max-w-3xl space-y-4">
-        {(data?.experience || []).map((exp, i) => (
+        {data?.experience?.map((exp, i) => (
           <motion.div
             key={exp}
             custom={i}
@@ -193,7 +194,7 @@ export function ServicesSection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Comprehensive pediatric care for your child</p>
         </div>
         <div className="mx-auto grid max-w-4xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {(data?.services || []).map((service, i) => (
+          {data?.services?.map((service, i) => (
             <motion.div
               key={service}
               custom={i}

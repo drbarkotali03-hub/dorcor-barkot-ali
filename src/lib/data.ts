@@ -1,6 +1,7 @@
-import { get, ref, set } from "firebase/database";
+
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { z } from "zod";
-import { db } from "./firebase";
+import { db } from "@/firebase";
 
 const REPO_URL = "https://github.com/drbarkotali03-hub/dorcor-barkot-ali";
 
@@ -15,6 +16,7 @@ export const siteDataSchema = z.object({
   qualifications: z.array(z.string()),
   memberships: z.array(z.string()),
   services: z.array(z.string()),
+  experience: z.array(z.string()).optional(), // Made optional for safety
   chambers: z.array(
     z.object({
       id: z.string(),
@@ -84,6 +86,7 @@ export function getDefaultSiteData(): SiteData {
       "Growth Monitoring",
       "Nutrition Advice",
     ],
+    experience: [],
     chambers: [
       {
         id: "1",
@@ -119,7 +122,7 @@ export function getDefaultSiteData(): SiteData {
     gallery: [],
     contact: {
       whatsappNumbers: ["01712-050951"],
-      phoneNumbers: ["01784-052339"],
+      phoneNumbers: ["01784-032951"],
       website: new URL(REPO_URL).hostname,
       facebook: "facebook.com/drbarkotali",
     },
@@ -131,13 +134,13 @@ export function getDefaultSiteData(): SiteData {
   };
 }
 
-const dataRef = ref(db, "data");
+const docRef = doc(db, "site", "data");
 
 export async function getData(): Promise<SiteData> {
   try {
-    const snapshot = await get(dataRef);
-    if (snapshot.exists()) {
-      const data = snapshot.val();
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const data = docSnap.data();
       return siteDataSchema.parse(data);
     } else {
       console.log("No data available, returning default data.");
@@ -151,11 +154,10 @@ export async function getData(): Promise<SiteData> {
 
 export async function setData(data: SiteData): Promise<void> {
   try {
-    // Validate data before setting
     const validatedData = siteDataSchema.parse(data);
-    await set(dataRef, validatedData);
+    await setDoc(docRef, validatedData, { merge: true });
   } catch (error) {
     console.error("Validation failed or error setting data:", error);
-    throw error; // Re-throw the error to be handled by the caller
+    throw error;
   }
 }
