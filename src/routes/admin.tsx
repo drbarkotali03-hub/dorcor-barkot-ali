@@ -16,6 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+// CORRECT: Import the RPC function for resetting data.
+import { resetDataOnServer } from "@/lib/firebase.server";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -205,14 +208,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const handleReset = async () => {
     if (confirm("Are you sure you want to reset all data to the default values? This cannot be undone.")) {
       try {
-        const response = await fetch("/api/reset-data", { method: "POST" });
-        const result = await response.json();
-        if (!response.ok || !result.success) {
+        // CORRECT: Call the RPC function directly.
+        const result = await resetDataOnServer();
+        if (!result.success) {
             throw new Error(result.message || "Failed to reset data.");
         }
         refetch(); // Refetch data to update the UI
       } catch (err) {
-          const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
+        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
         alert(`Error resetting data: ${errorMessage}`);
       }
     }

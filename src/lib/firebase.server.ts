@@ -3,9 +3,9 @@ import { createServerFn } from '@tanstack/start/server';
 import admin from 'firebase-admin';
 import { siteDataSchema, type SiteData, getDefaultSiteData } from '@/lib/data';
 
-// This function will only ever be imported on the server
-export function initializeFirebaseAdmin() {
-  // Ensure this is only run on the server
+// This function is now local to this module and NOT exported.
+// This is the key to preventing the 'import-protection' error.
+function initializeFirebaseAdmin() {
   if (typeof window !== 'undefined') {
     throw new Error('initializeFirebaseAdmin should only be called on the server.');
   }
@@ -27,6 +27,7 @@ export function initializeFirebaseAdmin() {
   return admin.database();
 }
 
+// EXPORT 1: The RPC function to reset data. It's safe to import this on the client.
 export const resetDataOnServer = createServerFn('POST', async () => {
   'use server';
   console.log('Resetting data on the server...');
@@ -38,12 +39,13 @@ export const resetDataOnServer = createServerFn('POST', async () => {
     return { success: true, message: 'Data reset successfully.' };
   } catch (error: any) {
     console.error('[Server Function Error] resetDataOnServer:', error);
-    throw new Error(error.message || 'An unknown server error occurred during reset.');
+    // It's better to throw a generic error message to the client
+    throw new Error('An unknown server error occurred during reset.');
   }
 });
 
-// Correct way to handle arguments with createServerFn
-const saveFn = async (data: SiteData) => {
+// EXPORT 2: The RPC function to save data. It's also safe to import on the client.
+export const newSaveDataToServer = createServerFn('POST', async (data: SiteData) => {
   'use server';
   console.log('Saving data on the server...');
   try {
@@ -56,6 +58,4 @@ const saveFn = async (data: SiteData) => {
     console.error('[Server Function Error] saveDataToServer:', error);
     throw new Error(error.message || 'An unknown server error occurred.');
   }
-};
-
-export const newSaveDataToServer = createServerFn('POST', saveFn);
+});

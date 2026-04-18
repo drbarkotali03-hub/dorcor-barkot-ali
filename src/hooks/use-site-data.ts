@@ -2,6 +2,8 @@
 // src/hooks/use-site-data.ts
 import { useState, useEffect, useCallback } from "react";
 import { getData, type SiteData, getDefaultSiteData } from "@/lib/data";
+// CORRECT: Import the RPC function directly. The framework handles the client/server boundary.
+import { newSaveDataToServer } from "@/lib/firebase.server";
 
 export function useSiteData() {
   const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
@@ -27,15 +29,10 @@ export function useSiteData() {
 
   const updateData = useCallback(async (newData: SiteData) => {
     try {
-      const response = await fetch("/api/save-data", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newData),
-      });
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Failed to save data.");
+      // CORRECT: Directly call the server function. No more fetch!
+      const result = await newSaveDataToServer(newData);
+      if (!result.success) {
+        throw new Error(result.message);
       }
       setLocalData(newData);
     } catch (e) {
