@@ -188,6 +188,7 @@ export function ChambersEditor({ chambers, onChange }: { chambers: Chamber[]; on
           <Field label="Name" value={c.name} onChange={(v) => update(i, { name: v })} />
           <Field label="Address" value={c.address} onChange={(v) => update(i, { address: v })} />
           <Field label="Map Search Query" value={c.mapQuery} onChange={(v) => update(i, { mapQuery: v })} />
+          <Field label="Google Maps Link" value={c.googleMapsLink ?? ""} onChange={(v) => update(i, { googleMapsLink: v || undefined })} />
           <Field label="Hotline" value={c.hotline ?? ""} onChange={(v) => update(i, { hotline: v || undefined })} />
           <Field label="Website" value={c.website ?? ""} onChange={(v) => update(i, { website: v || undefined })} />
           <Field label="Facebook" value={c.facebook ?? ""} onChange={(v) => update(i, { facebook: v || undefined })} />
@@ -195,16 +196,20 @@ export function ChambersEditor({ chambers, onChange }: { chambers: Chamber[]; on
             <label className="text-sm font-medium text-foreground">Schedule (one per line)</label>
             <textarea
               className="admin-input mt-1 min-h-[80px]"
-              value={c.schedule.join("\n")}
-              onChange={(e) => update(i, { schedule: e.target.value.split("\n") })}
+              value={c.schedule.join("
+")}
+              onChange={(e) => update(i, { schedule: e.target.value.split("
+") })}
             />
           </div>
           <div>
             <label className="text-sm font-medium text-foreground">Phones (one per line)</label>
             <textarea
               className="admin-input mt-1 min-h-[60px]"
-              value={c.phones.join("\n")}
-              onChange={(e) => update(i, { phones: e.target.value.split("\n").filter(Boolean) })}
+              value={c.phones.join("
+")}
+              onChange={(e) => update(i, { phones: e.target.value.split("
+").filter(Boolean) })}
             />
           </div>
         </div>

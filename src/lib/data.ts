@@ -22,6 +22,7 @@ export interface Chamber {
   website?: string;
   facebook?: string;
   mapQuery: string;
+  googleMapsLink?: string; // Add this line
 }
 
 export interface ContactInfo {
@@ -101,6 +102,7 @@ const DEFAULT_DATA: SiteData = {
       ],
       phones: ["01784-052339", "01972-050951"],
       mapQuery: "Khadija Villa Daulatpur Khulna",
+      googleMapsLink: "https://maps.app.goo.gl/u5Kzv5Gz8jCHaQd56", // Example link
     },
     {
       id: "2",
@@ -115,6 +117,7 @@ const DEFAULT_DATA: SiteData = {
       website: "www.populardiagnostic.com",
       facebook: "facebook.com/populardiagnostickhulna",
       mapQuery: "Popular Diagnostic Centre Khulna",
+      googleMapsLink: "https://maps.app.goo.gl/5rCgCpmWpU3x1jBE7", // Example link
     },
   ],
   gallery: [],

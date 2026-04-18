@@ -88,10 +88,17 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 )}
               </div>
 
-              {/* Appointment CTA */}
-              <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp mt-6 w-full justify-center text-sm py-3">
-                <MessageCircle className="h-4 w-4" /> Book Appointment
-              </a>
+              {/* Action Buttons */}
+              <div className="mt-6 flex flex-col sm:flex-row gap-3">
+                <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp flex-1 justify-center text-sm py-3">
+                  <MessageCircle className="h-4 w-4" /> Book Appointment
+                </a>
+                {chamber.googleMapsLink && (
+                  <a href={chamber.googleMapsLink} target="_blank" rel="noopener noreferrer" className="btn-secondary flex-1 justify-center text-sm py-3">
+                    <MapPin className="h-4 w-4" /> View on Map
+                  </a>
+                )}
+              </div>
             </div>
           </motion.div>
         ))}
