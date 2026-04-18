@@ -54,6 +54,7 @@ export function AboutSection({ data }: { data: SiteData }) {
 }
 
 export function QualificationsSection({ data }: { data: SiteData }) {
+  if (!data.qualifications || data.qualifications.length === 0) return null;
   return (
     <section id="qualifications" className="hero-gradient">
       <div className="section-container">
@@ -158,6 +159,7 @@ export function GallerySection({ data }: { data: SiteData }) {
 }
 
 export function ExperienceSection({ data }: { data: SiteData }) {
+  if (!data.experience || data.experience.length === 0) return null;
   return (
     <section className="section-container">
       <div className="text-center">
@@ -187,6 +189,7 @@ export function ExperienceSection({ data }: { data: SiteData }) {
 }
 
 export function ServicesSection({ data }: { data: SiteData }) {
+  if (!data.services || data.services.length === 0) return null;
   return (
     <section id="services" className="hero-gradient">
       <div className="section-container">
