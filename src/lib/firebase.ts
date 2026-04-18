@@ -3,7 +3,7 @@
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
-import { getDatabase } from "firebase/database";
+import { getFirestore } from "firebase/firestore";
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -20,8 +20,8 @@ const firebaseConfig = {
 // Initialize Firebase only if it hasn't been initialized yet
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Initialize Realtime Database
-const db = getDatabase(app);
+// Initialize Firestore
+export const db = getFirestore(app);
 
 // Initialize Analytics only on client-side
 let analytics: Analytics | null = null;
@@ -33,5 +33,5 @@ if (typeof window !== "undefined") {
   }
 }
 
-export { app, db, analytics };
+export { app, analytics };
 export default app;
