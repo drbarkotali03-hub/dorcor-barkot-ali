@@ -1,4 +1,8 @@
+import { get, ref, set } from "firebase/database";
 import { z } from "zod";
+import { db } from "./firebase";
+
+const REPO_URL = "https://github.com/drbarkotali03-hub/dorcor-barkot-ali";
 
 export const siteDataSchema = z.object({
   doctor: z.object({
@@ -23,7 +27,7 @@ export const siteDataSchema = z.object({
       facebook: z.string().optional(),
       mapQuery: z.string(),
       googleMapsLink: z.string().url().optional(),
-      embedMapLink: z.string().url().optional(), // Added this line
+      embedMapLink: z.string().url().optional(),
     })
   ),
   gallery: z.array(
@@ -56,7 +60,7 @@ export function getDefaultSiteData(): SiteData {
       name: "Professor Dr. Md. Barkot Ali",
       title: "MBBS, FCPS (Pediatrics), MD (Neonatology)",
       bmdc: "A-28256",
-      imageUrl: "https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png",
+      imageUrl: `https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png`,
       intro:
         "Dr. Md. Barkot Ali is a distinguished Child Specialist with extensive experience in pediatrics and neonatology. He is dedicated to providing the highest quality care for children, from newborns to adolescents. With a focus on compassionate and comprehensive treatment, Dr. Ali ensures the well-being of every child he sees.",
     },
@@ -64,7 +68,7 @@ export function getDefaultSiteData(): SiteData {
       "MBBS - Sher-e-Bangla Medical College",
       "FCPS (Pediatrics) - Bangladesh College of Physicians and Surgeons (BCPS)",
       "MD (Neonatology) - Bangabandhu Sheikh Mujib Medical University (BSMMU)",
-      "Fellow, Newborn Medicine - Royal Alexandra Hospital, Edmonton, Canada",
+      `Fellow, Newborn Medicine - Royal Alexandra Hospital, Edmonton, Canada`,
     ],
     memberships: [
       "Bangladesh Medical & Dental Council (BMDC)",
@@ -93,7 +97,7 @@ export function getDefaultSiteData(): SiteData {
         phones: ["01784-052339", "01972-050951"],
         mapQuery: "Khadija Villa Daulatpur Khulna",
         googleMapsLink: "https://maps.app.goo.gl/u5Kzv5Gz8jCHaQd56",
-        embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3676.8344265934503!2d89.5398363759914!3d22.844937222855584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff9aac91a55555%3A0x15a6b5870425010e!2sKhadija%20Villa!5e0!3m2!1sen!2sbd!4v1713432791459!5m2!1sen!2sbd", // Example embed link
+        embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3676.8344265934503!2d89.5398363759914!3d22.844937222855584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff9aac91a55555%3A0x15a6b5870425010e!2sKhadija%20Villa!5e0!3m2!1sen!2sbd!4v1713432791459!5m2!1sen!2sbd",
       },
       {
         id: "2",
@@ -109,20 +113,49 @@ export function getDefaultSiteData(): SiteData {
 				facebook: "facebook.com/populardiagnostickhulna",
         mapQuery: "Popular Diagnostic Centre Khulna",
         googleMapsLink: "https://maps.app.goo.gl/5rCgCpmWpU3x1jBE7",
-        embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3677.669527923759!2d89.55393937599049!3d22.81439992524385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff901b351de589%3A0x6331a9b89ce32918!2sPopular%20Diagnostic%20Centre%2C%20Khulna!5e0!3m2!1sen!2sbd!4v1713432864708!5m2!1sen!2sbd", // Example embed link
+        embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3677.669527923759!2d89.55393937599049!3d22.81439992524385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff901b351de589%3A0x6331a9b89ce32918!2sPopular%20Diagnostic%20Centre%2C%20Khulna!5e0!3m2!1sen!2sbd!4v1713432864708!5m2!1sen!2sbd",
       },
     ],
     gallery: [],
     contact: {
       whatsappNumbers: ["01712-050951"],
       phoneNumbers: ["01784-052339"],
-      website: "www.drbarkotali.com",
+      website: new URL(REPO_URL).hostname,
       facebook: "facebook.com/drbarkotali",
     },
     settings: {
       siteTitle: "Dr. Barkot Ali - Child Specialist Khulna",
-      logo: "https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png",
+      logo: `https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png`,
       adminPassword: "Barkot Ali",
     },
   };
+}
+
+const dataRef = ref(db, "data");
+
+export async function getData(): Promise<SiteData> {
+  try {
+    const snapshot = await get(dataRef);
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      return siteDataSchema.parse(data);
+    } else {
+      console.log("No data available, returning default data.");
+      return getDefaultSiteData();
+    }
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return getDefaultSiteData();
+  }
+}
+
+export async function setData(data: SiteData): Promise<void> {
+  try {
+    // Validate data before setting
+    const validatedData = siteDataSchema.parse(data);
+    await set(dataRef, validatedData);
+  } catch (error) {
+    console.error("Validation failed or error setting data:", error);
+    throw error; // Re-throw the error to be handled by the caller
+  }
 }
