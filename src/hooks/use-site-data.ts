@@ -1,6 +1,8 @@
+
 // src/hooks/use-site-data.ts
 import { useState, useEffect, useCallback } from "react";
-import { getData, setData, type SiteData, getDefaultSiteData } from "@/lib/data";
+import { getData, type SiteData, getDefaultSiteData } from "@/lib/data";
+import { saveData } from "@/lib/api"; // Import the new save function
 
 export function useSiteData() {
   const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
@@ -21,21 +23,19 @@ export function useSiteData() {
   }, []);
 
   useEffect(() => {
-    // Only fetch data on the client-side (in the browser)
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       fetchData();
     }
   }, [fetchData]);
 
   const updateData = useCallback(async (newData: SiteData) => {
     try {
-      await setData(newData);
-      setLocalData(newData); // Update local state immediately after successful save
+      await saveData(newData); // Use the new API function
+      setLocalData(newData); 
     } catch (e) {
       setError("Failed to save data. Please check your connection.");
       console.error(e);
-      // Optionally, you might want to revert the local state or show an error message
-      throw e; // Re-throw the error to be caught by the caller if needed
+      throw e; 
     }
   }, []);
 

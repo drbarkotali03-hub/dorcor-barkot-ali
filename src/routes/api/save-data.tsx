@@ -1,36 +1,59 @@
 
-import { json, type RequestHandler } from "@tanstack/react-router";
-import admin from "firebase-admin";
-import { siteDataSchema } from "@/lib/data";
+import { createFileRoute, json } from '@tanstack/react-router';
+import admin from 'firebase-admin';
+import { siteDataSchema, type SiteData } from '@/lib/data';
 
-// Get the Firebase Admin SDK config from environment variables
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_ADMIN_SDK_CONFIG || "{}"
-);
+// Helper function to initialize Firebase Admin SDK
+function initializeFirebaseAdmin() {
+  // Access environment variables on the server
+  const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
+  const databaseURL = process.env.VITE_FIREBASE_DATABASE_URL;
 
-// Initialize Firebase Admin if not already initialized
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: process.env.VITE_FIREBASE_DATABASE_URL,
-  });
+  if (!serviceAccountString) {
+    throw new Error('FIREBASE_ADMIN_SDK_CONFIG environment variable is not set.');
+  }
+  if (!databaseURL) {
+    throw new Error("VITE_FIREBASE_DATABASE_URL environment variable is not set.");
+  }
+
+  // Parse the service account JSON
+  const serviceAccount = JSON.parse(serviceAccountString);
+
+  // Initialize the app if it's not already initialized
+  if (admin.apps.length === 0) {
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: databaseURL,
+    });
+  }
+  return admin.database();
 }
 
-const db = admin.database();
+// Create the file-based route for /api/save-data
+export const Route = createFileRoute('/api/save-data')({
+  // This action will handle the POST request
+  action: async ({ request }) => {
+    if (request.method !== 'POST') {
+      return json({ success: false, message: 'Invalid request method.' }, { status: 405 });
+    }
 
-export const POST: RequestHandler = async ({ request }) => {
-  try {
-    const data = await request.json();
+    try {
+      const data: SiteData = await request.json();
 
-    // Validate the incoming data
-    const validatedData = siteDataSchema.parse(data);
+      // Validate the incoming data
+      siteDataSchema.parse(data);
 
-    // Save the data to the Firebase Realtime Database
-    await db.ref("data").set(validatedData);
+      // Initialize Firebase Admin and get a database reference
+      const db = initializeFirebaseAdmin();
 
-    return json({ success: true, message: "Data saved successfully." });
-  } catch (error) {
-    console.error("Error saving data:", error);
-    return json({ success: false, message: "Failed to save data." }, 500);
-  }
-};
+      // Set the data at the 'data' path in your Realtime Database
+      await db.ref('data').set(data);
+
+      return json({ success: true, message: 'Data saved successfully.' });
+    } catch (error: any) {
+      console.error('Error saving data:', error);
+      // Return a detailed error message for debugging
+      return json({ success: false, message: error.message || 'Failed to save data.' }, { status: 500 });
+    }
+  },
+});
