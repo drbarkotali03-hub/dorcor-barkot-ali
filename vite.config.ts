@@ -6,9 +6,11 @@
 //     error logger plugins, and sandbox detection (port/host/strictPort).
 // You can pass additional config via defineConfig({ vite: { ... } }) if needed.
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
+import wasm from 'vite-plugin-wasm';
 
 export default defineConfig({
   vite: {
+    plugins: [wasm()],
     optimizeDeps: {
       exclude: ['farmhash-modern']
     }
