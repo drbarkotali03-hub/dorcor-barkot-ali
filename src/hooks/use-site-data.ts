@@ -21,7 +21,10 @@ export function useSiteData() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    // Only fetch data on the client-side (in the browser)
+    if (typeof window !== 'undefined') {
+      fetchData();
+    }
   }, [fetchData]);
 
   const updateData = useCallback(async (newData: SiteData) => {
