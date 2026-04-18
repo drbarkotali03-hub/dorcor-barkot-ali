@@ -3,7 +3,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
-import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 
 // Firebase configuration from environment variables
 const firebaseConfig = {
@@ -14,13 +14,14 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore Database
-const db = getFirestore(app);
+// Initialize Realtime Database
+const db = getDatabase(app);
 
 // Initialize Analytics only on client-side
 let analytics: Analytics | null = null;
