@@ -28,15 +28,17 @@ export function ChambersSection({ data }: { data: SiteData }) {
             className="glass-card overflow-hidden group"
           >
             {/* Map */}
-            <div className="h-48 w-full bg-muted/50 overflow-hidden">
-              <iframe
-                title={`Map of ${chamber.name}`}
-                src={`https://www.google.com/maps?q=${encodeURIComponent(chamber.mapQuery)}&output=embed`}
-                className="h-full w-full border-0 transition-transform duration-500 group-hover:scale-105"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              />
-            </div>
+            {chamber.embedMapLink && (
+              <div className="h-48 w-full bg-muted/50 overflow-hidden">
+                <iframe
+                  title={`Map of ${chamber.name}`}
+                  src={chamber.embedMapLink}
+                  className="h-full w-full border-0 transition-transform duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+            )}
 
             <div className="p-7">
               <h3 className="text-lg font-bold text-foreground">{chamber.name}</h3>
@@ -93,7 +95,7 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp flex-1 justify-center text-sm py-3">
                   <MessageCircle className="h-4 w-4" /> Book Appointment
                 </a>
-                {chamber.googleMapsLink && (
+                {chamber.googleMapsLink && !chamber.embedMapLink && (
                   <a href={chamber.googleMapsLink} target="_blank" rel="noopener noreferrer" className="btn-secondary flex-1 justify-center text-sm py-3">
                     <MapPin className="h-4 w-4" /> View on Map
                   </a>
