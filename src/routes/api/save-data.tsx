@@ -1,59 +1,58 @@
 
 import { createFileRoute, json } from '@tanstack/react-router';
-import admin from 'firebase-admin';
 import { siteDataSchema, type SiteData } from '@/lib/data';
 
-// Helper function to initialize Firebase Admin SDK
-function initializeFirebaseAdmin() {
-  // Access environment variables on the server
-  const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
-  const databaseURL = process.env.VITE_FIREBASE_DATABASE_URL;
+// NOTE: We are NOT importing 'firebase-admin' at the top level anymore.
 
-  if (!serviceAccountString) {
-    throw new Error('FIREBASE_ADMIN_SDK_CONFIG environment variable is not set.');
-  }
-  if (!databaseURL) {
-    throw new Error("VITE_FIREBASE_DATABASE_URL environment variable is not set.");
-  }
-
-  // Parse the service account JSON
-  const serviceAccount = JSON.parse(serviceAccountString);
-
-  // Initialize the app if it's not already initialized
-  if (admin.apps.length === 0) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      databaseURL: databaseURL,
-    });
-  }
-  return admin.database();
-}
-
-// Create the file-based route for /api/save-data
 export const Route = createFileRoute('/api/save-data')({
-  // This action will handle the POST request
+  // This action will only run on the server
   action: async ({ request }) => {
     if (request.method !== 'POST') {
       return json({ success: false, message: 'Invalid request method.' }, { status: 405 });
     }
 
     try {
+      // 1. Dynamically import 'firebase-admin' inside the server-only action
+      const admin = (await import('firebase-admin')).default;
+
+      // 2. Helper function to initialize Firebase Admin SDK
+      const initializeFirebaseAdmin = () => {
+        const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
+        const databaseURL = process.env.VITE_FIREBASE_DATABASE_URL;
+
+        if (!serviceAccountString) {
+          throw new Error('Server Error: FIREBASE_ADMIN_SDK_CONFIG is not set.');
+        }
+        if (!databaseURL) {
+          throw new Error("Server Error: VITE_FIREBASE_DATABASE_URL is not set.");
+        }
+
+        // Initialize only if no apps are running
+        if (admin.apps.length === 0) {
+          const serviceAccount = JSON.parse(serviceAccountString);
+          admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+            databaseURL: databaseURL,
+          });
+        }
+        return admin.database();
+      };
+
+      // 3. Get data and save to DB
+      const db = initializeFirebaseAdmin();
       const data: SiteData = await request.json();
 
-      // Validate the incoming data
+      // Validate data before saving
       siteDataSchema.parse(data);
 
-      // Initialize Firebase Admin and get a database reference
-      const db = initializeFirebaseAdmin();
-
-      // Set the data at the 'data' path in your Realtime Database
       await db.ref('data').set(data);
 
       return json({ success: true, message: 'Data saved successfully.' });
     } catch (error: any) {
-      console.error('Error saving data:', error);
-      // Return a detailed error message for debugging
-      return json({ success: false, message: error.message || 'Failed to save data.' }, { status: 500 });
+      // Log the detailed error on the server for debugging
+      console.error('[API Error] /api/save-data:', error);
+      return json({ success: false, message: error.message || 'An unknown server error occurred.' }, { status: 500 });
     }
   },
 });
+
