@@ -36,16 +36,16 @@ export function AboutSection({ data }: { data: SiteData }) {
           <div className="relative shrink-0">
             <div className="absolute -inset-2 rounded-2xl bg-gradient-to-br from-primary/15 to-transparent blur-lg" />
             <img
-              src={data.doctor.imageUrl}
-              alt={`${data.doctor.name} Child Specialist Khulna`}
+              src={data?.doctor?.imageUrl}
+              alt={`${data?.doctor?.name} Child Specialist Khulna`}
               className="relative h-32 w-32 rounded-2xl object-cover shadow-lg ring-1 ring-primary/10"
             />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-foreground">{data.doctor.name}</h3>
-            <p className="text-primary font-semibold mt-1">{data.doctor.title}</p>
-            <p className="mt-4 text-muted-foreground leading-relaxed">{data.doctor.intro}</p>
-            <p className="mt-3 text-sm text-muted-foreground/70 font-medium">BMDC Registration: {data.doctor.bmdc}</p>
+            <h3 className="text-xl font-bold text-foreground">{data?.doctor?.name}</h3>
+            <p className="text-primary font-semibold mt-1">{data?.doctor?.title}</p>
+            <p className="mt-4 text-muted-foreground leading-relaxed">{data?.doctor?.intro}</p>
+            <p className="mt-3 text-sm text-muted-foreground/70 font-medium">BMDC Registration: {data?.doctor?.bmdc}</p>
           </div>
         </div>
       </motion.div>
@@ -54,7 +54,6 @@ export function AboutSection({ data }: { data: SiteData }) {
 }
 
 export function QualificationsSection({ data }: { data: SiteData }) {
-  if (!data.qualifications || data.qualifications.length === 0) return null;
   return (
     <section id="qualifications" className="hero-gradient">
       <div className="section-container">
@@ -63,7 +62,7 @@ export function QualificationsSection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Academic excellence from renowned institutions</p>
         </div>
         <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-          {data.qualifications.map((q, i) => (
+          {(data?.qualifications || []).map((q, i) => (
             <motion.div
               key={q}
               custom={i}
@@ -86,7 +85,6 @@ export function QualificationsSection({ data }: { data: SiteData }) {
 }
 
 export function MembershipSection({ data }: { data: SiteData }) {
-  if (!data.memberships || data.memberships.length === 0) return null;
   return (
     <section id="membership" className="section-container">
       <div className="text-center">
@@ -94,7 +92,7 @@ export function MembershipSection({ data }: { data: SiteData }) {
         <p className="section-subtitle">Professional affiliations & memberships</p>
       </div>
       <div className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2">
-        {data.memberships.map((m, i) => (
+        {(data?.memberships || []).map((m, i) => (
           <motion.div
             key={m + i}
             custom={i}
@@ -116,7 +114,6 @@ export function MembershipSection({ data }: { data: SiteData }) {
 }
 
 export function GallerySection({ data }: { data: SiteData }) {
-  if (!data.gallery || data.gallery.length === 0) return null;
   return (
     <section id="gallery" className="hero-gradient">
       <div className="section-container">
@@ -125,7 +122,7 @@ export function GallerySection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Moments from our practice</p>
         </div>
         <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {data.gallery.map((item, i) => (
+          {(data?.gallery || []).map((item, i) => (
             <motion.figure
               key={item.id}
               custom={i}
@@ -159,7 +156,6 @@ export function GallerySection({ data }: { data: SiteData }) {
 }
 
 export function ExperienceSection({ data }: { data: SiteData }) {
-  if (!data.experience || data.experience.length === 0) return null;
   return (
     <section className="section-container">
       <div className="text-center">
@@ -167,7 +163,7 @@ export function ExperienceSection({ data }: { data: SiteData }) {
         <p className="section-subtitle">A distinguished career in pediatric medicine</p>
       </div>
       <div className="mx-auto max-w-3xl space-y-4">
-        {data.experience.map((exp, i) => (
+        {(data?.experience || []).map((exp, i) => (
           <motion.div
             key={exp}
             custom={i}
@@ -189,7 +185,6 @@ export function ExperienceSection({ data }: { data: SiteData }) {
 }
 
 export function ServicesSection({ data }: { data: SiteData }) {
-  if (!data.services || data.services.length === 0) return null;
   return (
     <section id="services" className="hero-gradient">
       <div className="section-container">
@@ -198,7 +193,7 @@ export function ServicesSection({ data }: { data: SiteData }) {
           <p className="section-subtitle">Comprehensive pediatric care for your child</p>
         </div>
         <div className="mx-auto grid max-w-4xl gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {data.services.map((service, i) => (
+          {(data?.services || []).map((service, i) => (
             <motion.div
               key={service}
               custom={i}

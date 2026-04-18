@@ -12,7 +12,7 @@ function toTelLink(num: string) {
 }
 
 export function ContactSection({ data }: { data: SiteData }) {
-  const { whatsappNumbers, phoneNumbers, website, facebook } = data.contact;
+  const { whatsappNumbers, phoneNumbers, website, facebook } = data?.contact || {};
 
   return (
     <section id="contact" className="hero-gradient">
@@ -23,7 +23,7 @@ export function ContactSection({ data }: { data: SiteData }) {
         </div>
 
         <div className="mx-auto grid max-w-3xl gap-5 sm:grid-cols-2">
-          {whatsappNumbers.filter(Boolean).map((num) => (
+          {(whatsappNumbers || []).filter(Boolean).map((num) => (
             <a
               key={`wa-${num}`}
               href={toWaLink(num)}
@@ -41,7 +41,7 @@ export function ContactSection({ data }: { data: SiteData }) {
             </a>
           ))}
 
-          {phoneNumbers.filter(Boolean).map((num) => (
+          {(phoneNumbers || []).filter(Boolean).map((num) => (
             <a
               key={`ph-${num}`}
               href={toTelLink(num)}
@@ -101,10 +101,10 @@ export function Footer({ data }: { data: SiteData }) {
     <footer className="border-t border-border bg-card/30 py-10">
       <div className="mx-auto max-w-7xl px-4 text-center">
         <p className="text-sm font-medium text-muted-foreground">
-          © {new Date().getFullYear()} {data.doctor.name}. All rights reserved.
+          © {new Date().getFullYear()} {data?.doctor?.name}. All rights reserved.
         </p>
         <p className="mt-1.5 text-xs text-muted-foreground/60">
-          {data.doctor.title} | BMDC: {data.doctor.bmdc}
+          {data?.doctor?.title} | BMDC: {data?.doctor?.bmdc}
         </p>
       </div>
     </footer>

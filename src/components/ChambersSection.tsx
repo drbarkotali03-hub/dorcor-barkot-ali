@@ -17,7 +17,7 @@ export function ChambersSection({ data }: { data: SiteData }) {
         <p className="section-subtitle">Visit us at any of our convenient locations</p>
       </div>
       <div className="mx-auto grid max-w-5xl gap-8 lg:grid-cols-2">
-        {data.chambers.map((chamber, i) => (
+        {(data?.chambers || []).map((chamber, i) => (
           <motion.div
             key={chamber.id}
             custom={i}
@@ -52,17 +52,17 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 <div className="flex items-start gap-3 text-muted-foreground">
                   <Clock className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <div>
-                    {chamber.schedule.map((s) => (
+                    {(chamber.schedule || []).map((s) => (
                       <div key={s}>{s}</div>
                     ))}
                   </div>
                 </div>
 
-                {chamber.phones.length > 0 && (
+                {(chamber.phones || []).length > 0 && (
                   <div className="flex items-start gap-3 text-muted-foreground">
                     <PhoneIcon className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                     <div className="flex flex-wrap gap-x-3 gap-y-1">
-                      {chamber.phones.map((p) => (
+                      {(chamber.phones || []).map((p) => (
                         <a key={p} href={`tel:+880${p.replace(/[^0-9]/g, "").replace(/^0/, "")}`} className="text-primary font-medium hover:underline">
                           {p}
                         </a>

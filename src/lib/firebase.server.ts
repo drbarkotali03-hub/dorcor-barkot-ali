@@ -2,56 +2,93 @@
 import admin from 'firebase-admin';
 import { type SiteData, siteDataSchema, getDefaultSiteData } from '@/lib/data';
 
-let db: admin.database.Database | null = null;
+// Debounce to prevent multiple initializations
+let firestore: admin.firestore.Firestore | null = null;
 
 function initializeFirebaseAdmin() {
-  if (db) {
-    return db;
+  if (firestore) {
+    return firestore;
   }
-  
+
   if (admin.apps.length > 0) {
-    db = admin.database();
-    return db;
+    firestore = admin.firestore();
+    return firestore;
   }
 
   const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
-  const databaseURL = process.env.VITE_FIREBASE_DATABASE_URL;
-
-  if (!serviceAccountString || !databaseURL) {
-    throw new Error('Firebase admin environment variables are not set.');
+  if (!serviceAccountString) {
+    throw new Error('CRITICAL: FIREBASE_ADMIN_SDK_CONFIG environment variable is not set.');
   }
 
-  const serviceAccount = JSON.parse(serviceAccountString);
+  try {
+    const serviceAccount = JSON.parse(serviceAccountString);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } catch (e: any) {
+    throw new Error(`Failed to parse Firebase service account JSON: ${e.message}`);
+  }
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: databaseURL,
-  });
-
-  db = admin.database();
-  return db;
+  firestore = admin.firestore();
+  return firestore;
 }
 
+// The single source of truth for the site data document
+function getSiteDataRef() {
+  const db = initializeFirebaseAdmin();
+  return db.collection('site').doc('data');
+}
+
+/**
+ * Saves the entire site data object to a single Firestore document.
+ */
 export async function saveDataToServer(data: SiteData): Promise<{ success: boolean; message: string }> {
   try {
-    const validatedData = siteDataSchema.parse(data); // Zod validation
-    const db = initializeFirebaseAdmin();
-    await db.ref('data').set(validatedData);
-    return { success: true, message: 'Data saved successfully.' };
+    // Ensure data is valid before saving
+    const validatedData = siteDataSchema.parse(data);
+    await getSiteDataRef().set(validatedData, { merge: true }); // Use set with merge to be safe
+    return { success: true, message: 'Data saved successfully to Firestore.' };
   } catch (error: any) {
-    console.error('Error saving data to Firebase:', error);
+    console.error('[Firestore Error] Failed to save data:', error);
     return { success: false, message: error.message || 'Failed to save data.' };
   }
 }
 
+/**
+ * Resets the site data to its default state in Firestore.
+ */
 export async function resetDataOnServer(): Promise<{ success: boolean; message: string }> {
   try {
-    const db = initializeFirebaseAdmin();
     const defaultData = getDefaultSiteData();
-    await db.ref('data').set(defaultData);
+    // Overwrite the document with the default data
+    await getSiteDataRef().set(defaultData);
     return { success: true, message: 'Data reset to default successfully.' };
   } catch (error: any) {
-    console.error('Error resetting data in Firebase:', error);
+    console.error('[Firestore Error] Failed to reset data:', error);
     return { success: false, message: error.message || 'Failed to reset data.' };
   }
+}
+
+// --- CRUD Functions for Patients (Secure Server-Side Operations) ---
+
+export async function getPatients() {
+  const db = initializeFirebaseAdmin();
+  const snapshot = await db.collection('patients').orderBy('name').get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+export async function addPatient(patient: { name: string }) {
+  if (!patient.name || patient.name.trim() === '') {
+    throw new Error('Patient name cannot be empty.');
+  }
+  const db = initializeFirebaseAdmin();
+  const docRef = await db.collection('patients').add({ name: patient.name.trim() });
+  return { id: docRef.id, name: patient.name.trim() };
+}
+
+export async function deletePatient(id: string) {
+  if (!id) throw new Error('Document ID is required for deletion.');
+  const db = initializeFirebaseAdmin();
+  await db.collection('patients').doc(id).delete();
+  return { success: true, message: `Patient ${id} deleted.` };
 }

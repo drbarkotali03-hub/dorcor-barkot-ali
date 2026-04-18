@@ -1,55 +1,61 @@
 
-// src/hooks/use-site-data.ts
-import { useState, useEffect, useCallback } from "react";
-import { getData, type SiteData, getDefaultSiteData } from "@/lib/data";
+import { createServerFn, useQuery } from "@tanstack/react-start";
+import { type SiteData, siteDataSchema, getDefaultSiteData } from "@/lib/data";
+import { getSiteDataRef, saveDataToServer, resetDataOnServer } from "@/lib/firebase.server";
+
+const fetchSiteData = createServerFn("GET", async (): Promise<SiteData> => {
+  try {
+    const doc = await getSiteDataRef().get();
+
+    if (!doc.exists) {
+      console.log("No site data found in Firestore, returning default data.");
+      return getDefaultSiteData();
+    }
+
+    const data = doc.data();
+    // Validate data against schema, return default on failure
+    const parsed = siteDataSchema.safeParse(data);
+    if (parsed.success) {
+      return parsed.data;
+    } else {
+      console.warn("Firestore data validation failed, returning default data:", parsed.error);
+      return getDefaultSiteData();
+    }
+  } catch (error) {
+    console.error("Error fetching from Firestore:", error);
+    // In case of a critical error (e.g., config issue), re-throw it so the client can see it.
+    if (error instanceof Error && error.message.startsWith('CRITICAL:')) {
+      throw error;
+    }
+    // For other errors, return default data to keep the site running.
+    return getDefaultSiteData();
+  }
+});
+
+const saveData = createServerFn("POST", async (data: SiteData) => {
+  return saveDataToServer(data);
+});
+
+const resetData = createServerFn("POST", async () => {
+  return resetDataOnServer();
+});
 
 export function useSiteData() {
-  const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data, ...rest } = useQuery({
+    queryKey: ["site-data"],
+    queryFn: async () => {
+        const data = await fetchSiteData();
+        return data
+    },
+    // Stale-while-revalidate strategy
+    staleTime: 1000 * 60, // 1 minute
+    refetchOnWindowFocus: true,
+  });
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const fetchedData = await getData();
-      setLocalData(fetchedData);
-    } catch (e) {
-      setError("Failed to load site data. Please try again later.");
-      console.error(e);
-    }
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const updateData = useCallback(async (newData: SiteData) => {
-    try {
-      const response = await fetch('/api/save-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || "Failed to save data on server.");
-      }
-      
-      setLocalData(newData); // Update local state on success
-
-    } catch (e) {
-      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
-      setError(`Failed to save data: ${errorMessage}`);
-      console.error(e);
-      throw e; // Re-throw to inform the caller (e.g., the Admin page)
-    }
-  }, []);
-
-  return { data, updateData, loading, error, refetch: fetchData };
+  return {
+    data: data || getDefaultSiteData(), // Ensure data is never undefined
+    saveData,
+    resetData,
+    ...rest,
+  };
 }

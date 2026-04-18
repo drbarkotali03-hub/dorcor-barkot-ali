@@ -1,3 +1,4 @@
+
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSiteData } from "@/hooks/use-site-data";
@@ -5,18 +6,16 @@ import { type SiteData } from "@/lib/data";
 import {
   User, GraduationCap, Briefcase, Heart, MapPin, Phone, Settings,
   Save, RotateCcw, LogOut, Sun, Moon, ChevronLeft, Menu, X, Check,
-  Award, Image as ImageIcon, Users, AlertCircle
+  Award, Image as ImageIcon, Users, AlertCircle, Trash2
 } from "lucide-react";
 import {
   DoctorEditor, ListEditor, ChambersEditor, ContactEditor, SettingsEditor,
   GalleryEditor, PasswordField
 } from "@/components/admin/AdminEditors";
-import { addDocument, getDocuments, deleteDocument } from "@/lib/firestoreService"; // Firebase
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -28,14 +27,25 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-// Simple component to test Firestore
 function PatientsEditor() {
   const [patients, setPatients] = useState<any[]>([]);
   const [newPatientName, setNewPatientName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchPatients = async () => {
-    const patientDocs = await getDocuments("patients");
-    setPatients(patientDocs);
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch('/api/patients');
+      if (!response.ok) throw new Error('Failed to fetch patients');
+      const data = await response.json();
+      setPatients(data);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -44,45 +54,67 @@ function PatientsEditor() {
 
   const handleAddPatient = async () => {
     if (newPatientName.trim() === "") return;
-    await addDocument("patients", { name: newPatientName });
-    setNewPatientName("");
-    fetchPatients(); // Refresh the list
+    try {
+      const response = await fetch('/api/patients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newPatientName.trim() }),
+      });
+      if (!response.ok) throw new Error('Failed to add patient');
+      setNewPatientName("");
+      fetchPatients(); // Refresh the list
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   const handleDeletePatient = async (id: string) => {
-    await deleteDocument("patients", id);
-    fetchPatients(); // Refresh the list
+    if (!confirm("Are you sure you want to delete this patient?")) return;
+    try {
+      const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
+      if (!response.ok) throw new Error('Failed to delete patient');
+      fetchPatients(); // Refresh the list
+    } catch (err: any) {
+      setError(err.message);
+    }
   };
 
   return (
     <Card className="p-4">
       <h3 className="text-lg font-semibold mb-4">Manage Patients</h3>
+      {error && <Alert variant="destructive" className="mb-4"><AlertCircle className="h-4 w-4" /><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
       <div className="flex gap-2 mb-4">
         <Input
           type="text"
           value={newPatientName}
           onChange={(e) => setNewPatientName(e.target.value)}
           placeholder="Enter patient name"
+          disabled={loading}
         />
-        <Button onClick={handleAddPatient}>Add Patient</Button>
+        <Button onClick={handleAddPatient} disabled={loading}>Add Patient</Button>
       </div>
-      <div className="space-y-2">
-        {patients.map((patient) => (
-          <div key={patient.id} className="flex items-center justify-between p-2 border rounded-md">
-            <span>{patient.name}</span>
-            <Button variant="destructive" size="sm" onClick={() => handleDeletePatient(patient.id)}>
-              Delete
-            </Button>
-          </div>
-        ))}
-      </div>
+      {loading ? (
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => <div key={i} className="h-12 bg-muted/50 rounded-md animate-pulse" />)}
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {patients.map((patient) => (
+            <div key={patient.id} className="flex items-center justify-between p-2 border rounded-md bg-card-foreground/5">
+              <span className="font-medium">{patient.name}</span>
+              <Button variant="ghost" size="icon" onClick={() => handleDeletePatient(patient.id)} className="text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
     </Card>
   );
 }
 
-
 function AdminPage() {
-  const { data, loading, error: siteDataError } = useSiteData(); // Use the hook to get initial data
+  const { data, loading, error: siteDataError, refetch } = useSiteData();
   const [authenticated, setAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -96,33 +128,35 @@ function AdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const adminPw = data.settings?.adminPassword || "Barkot Ali"; // Use data from the hook
+    const adminPw = data?.settings?.adminPassword || "Barkot Ali";
     if (username === "admin" && password === adminPw) {
       setAuthenticated(true);
       sessionStorage.setItem("admin_auth", "true");
+      setError("");
     } else {
       setError("Invalid credentials");
     }
   };
-  
+
   if (loading) {
-    return <div>Loading...</div>; // Show a loading state while fetching initial data
+    return <div className="flex min-h-screen items-center justify-center">Loading site configuration...</div>;
   }
 
   if (siteDataError) {
-      return (
-          <div className="flex min-h-screen items-center justify-center">
-              <Alert variant="destructive" className="max-w-md">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
-                  <AlertDescription>
-                      Failed to load site data. Please check your Firebase setup and internet connection.
-                  </AlertDescription>
-              </Alert>
-          </div>
-      );
+    return (
+      <div className="flex min-h-screen items-center justify-center p-4">
+        <Alert variant="destructive" className="max-w-md">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Fatal Error</AlertTitle>
+          <AlertDescription>
+            <p>Failed to load site data. This is often caused by missing or incorrect Firebase credentials on the server.</p>
+            <pre className="mt-2 whitespace-pre-wrap text-xs font-mono">{siteDataError.message}</pre>
+            <Button onClick={() => window.location.reload()} className="mt-4">Retry</Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
   }
-
 
   if (!authenticated) {
     return (
@@ -171,11 +205,11 @@ const SECTIONS: { key: SectionKey; label: string; icon: React.ReactNode }[] = [
   { key: "chambers", label: "Chambers", icon: <MapPin className="h-4 w-4" /> },
   { key: "contact", label: "Contact", icon: <Phone className="h-4 w-4" /> },
   { key: "settings", label: "Settings", icon: <Settings className="h-4 w-4" /> },
-  { key: "patients", label: "Patients", icon: <Users className="h-4 w-4" /> }, // New Section
+  { key: "patients", label: "Patients", icon: <Users className="h-4 w-4" /> },
 ];
 
 function AdminDashboard({ onLogout }: { onLogout: () => void }) {
-  const { data: initialData, updateData, loading, error, refetch } = useSiteData();
+  const { data: initialData, loading, error, refetch, saveData, resetData } = useSiteData();
   const [localData, setLocalData] = useState<SiteData>(initialData);
   const [active, setActive] = useState<SectionKey>("doctor");
   const [saving, setSaving] = useState(false);
@@ -191,32 +225,29 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     document.documentElement.classList.toggle("dark", dark);
   }, [dark]);
 
-  const save = async () => {
+  const handleSave = async () => {
     setSaving(true);
     try {
-      await updateData(localData);
+      const result = await saveData(localData);
+      if (!result.success) throw new Error(result.message);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      alert("Error saving data. Please try again.");
+      refetch(); // Refresh data from server
+    } catch (err: any) {
+      alert(`Error saving data: ${err.message}`);
     }
     setSaving(false);
   };
 
   const handleReset = async () => {
-    if (confirm("Are you sure you want to reset all data to the default values? This cannot be undone.")) {
+    if (confirm("Are you sure? This will reset all website content to the default values and cannot be undone.")) {
       try {
-        const response = await fetch('/api/reset-data', { method: 'POST' });
-        const result = await response.json();
-
-        if (!response.ok || !result.success) {
-          throw new Error(result.message || "Failed to reset data on server.");
-        }
-        
-        refetch(); // Refetch data to update the UI
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "An unknown error occurred.";
-        alert(`Error resetting data: ${errorMessage}`);
+        const result = await resetData();
+        if (!result.success) throw new Error(result.message);
+        alert("Data reset successfully!");
+        refetch(); // Refresh data from server
+      } catch (err: any) {
+        alert(`Error resetting data: ${err.message}`);
       }
     }
   };
@@ -224,32 +255,28 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const updateField = <K extends keyof SiteData>(key: K, value: SiteData[K]) => {
     setLocalData(prev => ({ ...prev, [key]: value }));
   };
-  
-  if (loading) {
-      return <div>Loading...</div>
+
+  if (loading && !localData) {
+    return <div>Loading dashboard...</div>;
   }
-  
+
   if (error) {
-      return <div>Error: {error}</div>
+    return <div>Error loading dashboard: {error.message}</div>;
   }
 
   return (
     <div className="flex min-h-screen bg-background">
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-foreground/20 lg:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
+      {sidebarOpen && <div className="fixed inset-0 z-40 bg-foreground/20 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-sidebar border-r border-sidebar-border transition-transform lg:static lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex h-full flex-col">
           <div className="flex items-center gap-3 border-b border-sidebar-border p-4">
-            <img src={localData.settings.logo} alt="Dr Barkot Ali" className="h-9 w-9 rounded-full object-cover" />
+            <img src={localData?.settings?.logo} alt="Dr Barkot Ali" className="h-9 w-9 rounded-full object-cover" />
             <div>
               <div className="text-sm font-bold text-sidebar-foreground">Admin Panel</div>
               <div className="text-xs text-muted-foreground">Dr. Barkot Ali</div>
             </div>
-            <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
-              <X className="h-5 w-5 text-sidebar-foreground" />
-            </button>
+            <button className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}><X className="h-5 w-5 text-sidebar-foreground" /></button>
           </div>
 
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
@@ -261,15 +288,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                   active === s.key ? "bg-sidebar-accent text-sidebar-primary" : "text-sidebar-foreground hover:bg-sidebar-accent/50"
                 }`}
               >
-                {s.icon}
-                {s.label}
+                {s.icon} {s.label}
               </button>
             ))}
           </nav>
 
           <div className="border-t border-sidebar-border p-3 space-y-2">
             <button onClick={() => setDark(!dark)} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent/50">
-              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" /> }
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               {dark ? "Light Mode" : "Dark Mode"}
             </button>
             <Link to="/" className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-sidebar-foreground hover:bg-sidebar-accent/50">
@@ -285,20 +311,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       <div className="flex-1">
         <header className="sticky top-0 z-30 flex items-center justify-between border-b border-border bg-background/80 backdrop-blur px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <button className="lg:hidden" onClick={() => setSidebarOpen(true)}>
-              <Menu className="h-5 w-5" />
-            </button>
-            <h1 className="text-lg font-bold text-foreground">
-              {SECTIONS.find((s) => s.key === active)?.label}
-            </h1>
+            <button className="lg:hidden" onClick={() => setSidebarOpen(true)}><Menu className="h-5 w-5" /></button>
+            <h1 className="text-lg font-bold text-foreground">{SECTIONS.find((s) => s.key === active)?.label}</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={handleReset} className="btn-secondary text-sm py-2 px-3">
-              <RotateCcw className="h-4 w-4" /> Reset
-            </button>
-            <button onClick={save} disabled={saving} className="btn-primary text-sm py-2 px-3">
-              {saving ? "Saving..." : (saved ? <><Check className="h-4 w-4" /> Saved!</> : <><Save className="h-4 w-4" /> Save</>)}
-            </button>
+            <Button onClick={handleReset} variant="destructive" className="text-sm py-2 px-3"><RotateCcw className="h-4 w-4 mr-1.5" /> Reset All</Button>
+            <Button onClick={handleSave} disabled={saving} className="btn-primary text-sm py-2 px-3 min-w-[100px]">
+              {saving ? "Saving..." : (saved ? <><Check className="h-4 w-4 mr-1.5" /> Saved!</> : <><Save className="h-4 w-4 mr-1.5" /> Save</>)}
+            </Button>
           </div>
         </header>
 
