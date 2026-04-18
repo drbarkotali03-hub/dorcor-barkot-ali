@@ -2,7 +2,7 @@
 // src/hooks/use-site-data.ts
 import { useState, useEffect, useCallback } from "react";
 import { getData, type SiteData, getDefaultSiteData } from "@/lib/data";
-import { saveData } from "@/lib/api"; // Import the new save function
+import { newSaveDataToServer } from "@/lib/firebase.server";
 
 export function useSiteData() {
   const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
@@ -23,19 +23,22 @@ export function useSiteData() {
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      fetchData();
-    }
+    fetchData();
   }, [fetchData]);
 
   const updateData = useCallback(async (newData: SiteData) => {
     try {
-      await saveData(newData); // Use the new API function
-      setLocalData(newData); 
+      // Directly call the server function
+      const result = await newSaveDataToServer(newData);
+      if (!result.success) {
+        throw new Error(result.message);
+      }
+      setLocalData(newData);
     } catch (e) {
-      setError("Failed to save data. Please check your connection.");
+      const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+      setError(`Failed to save data: ${errorMessage}`);
       console.error(e);
-      throw e; 
+      throw e;
     }
   }, []);
 
