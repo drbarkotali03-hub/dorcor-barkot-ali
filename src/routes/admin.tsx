@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db } from '@/firebase';
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
