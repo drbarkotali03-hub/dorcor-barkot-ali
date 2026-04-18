@@ -1,13 +1,9 @@
-
+// src/routes/api/patients/index.ts
 import { Route } from "@tanstack/react-router";
 import { rootRoute } from "../../../root";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { app } from "../../../../firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../../../../firebase"; // Using the new firebase.ts
 
-// Initialize Firestore
-const db = getFirestore(app);
-
-// A new route for the patient list
 export const patientListRoute = new Route({
   getParentRoute: () => rootRoute,
   path: "/api/patients",
@@ -21,7 +17,6 @@ export const patientListRoute = new Route({
       return { patients };
     } catch (error) {
       console.error("Error fetching patients:", error);
-      // Return an empty array or handle the error as needed
       return { patients: [] };
     }
   },
