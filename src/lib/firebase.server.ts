@@ -1,5 +1,6 @@
 
 import admin from 'firebase-admin';
+import { createServerFn } from '@tanstack/start';
 import { type SiteData, siteDataSchema, getDefaultSiteData } from '@/lib/data';
 
 // Debounce to prevent multiple initializations
@@ -34,7 +35,7 @@ function initializeFirebaseAdmin() {
 }
 
 // The single source of truth for the site data document
-function getSiteDataRef() {
+export function getSiteDataRef() {
   const db = initializeFirebaseAdmin();
   return db.collection('site').doc('data');
 }
@@ -71,24 +72,24 @@ export async function resetDataOnServer(): Promise<{ success: boolean; message: 
 
 // --- CRUD Functions for Patients (Secure Server-Side Operations) ---
 
-export async function getPatients() {
+export const getPatients = createServerFn({ method: 'GET' }).handler(async () => {
   const db = initializeFirebaseAdmin();
   const snapshot = await db.collection('patients').orderBy('name').get();
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-}
+});
 
-export async function addPatient(patient: { name: string }) {
+export const addPatient = createServerFn({ method: 'POST' }).handler(async (patient: { name: string }) => {
   if (!patient.name || patient.name.trim() === '') {
     throw new Error('Patient name cannot be empty.');
   }
   const db = initializeFirebaseAdmin();
   const docRef = await db.collection('patients').add({ name: patient.name.trim() });
   return { id: docRef.id, name: patient.name.trim() };
-}
+});
 
-export async function deletePatient(id: string) {
+export const deletePatient = createServerFn({ method: 'DELETE' }).handler(async (id: string) => {
   if (!id) throw new Error('Document ID is required for deletion.');
   const db = initializeFirebaseAdmin();
   await db.collection('patients').doc(id).delete();
   return { success: true, message: `Patient ${id} deleted.` };
-}
+});

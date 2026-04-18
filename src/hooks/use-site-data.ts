@@ -1,7 +1,35 @@
 
-import { createServerFn, useQuery } from "@tanstack/react-start";
+import { createServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { type SiteData, siteDataSchema, getDefaultSiteData } from "@/lib/data";
-import { getSiteDataRef, saveDataToServer, resetDataOnServer } from "@/lib/firebase.server";
+import admin from 'firebase-admin';
+
+const initializeFirebaseAdmin = () => {
+  if (admin.apps.length > 0) {
+    return admin.firestore();
+  }
+
+  const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
+  if (!serviceAccountString) {
+    throw new Error('CRITICAL: FIREBASE_ADMIN_SDK_CONFIG environment variable is not set.');
+  }
+
+  try {
+    const serviceAccount = JSON.parse(serviceAccountString);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  } catch (e: any) {
+    throw new Error(`Failed to parse Firebase service account JSON: ${e.message}`);
+  }
+
+  return admin.firestore();
+};
+
+const getSiteDataRef = () => {
+  const db = initializeFirebaseAdmin();
+  return db.collection('site').doc('data');
+};
 
 const fetchSiteData = createServerFn("GET", async (): Promise<SiteData> => {
   try {
@@ -33,11 +61,27 @@ const fetchSiteData = createServerFn("GET", async (): Promise<SiteData> => {
 });
 
 const saveData = createServerFn("POST", async (data: SiteData) => {
-  return saveDataToServer(data);
+  try {
+    // Ensure data is valid before saving
+    const validatedData = siteDataSchema.parse(data);
+    await getSiteDataRef().set(validatedData, { merge: true }); // Use set with merge to be safe
+    return { success: true, message: 'Data saved successfully to Firestore.' };
+  } catch (error: any) {
+    console.error('[Firestore Error] Failed to save data:', error);
+    return { success: false, message: error.message || 'Failed to save data.' };
+  }
 });
 
 const resetData = createServerFn("POST", async () => {
-  return resetDataOnServer();
+  try {
+    const defaultData = getDefaultSiteData();
+    // Overwrite the document with the default data
+    await getSiteDataRef().set(defaultData);
+    return { success: true, message: 'Data reset to default successfully.' };
+  } catch (error: any) {
+    console.error('[Firestore Error] Failed to reset data:', error);
+    return { success: false, message: error.message || 'Failed to reset data.' };
+  }
 });
 
 export function useSiteData() {
