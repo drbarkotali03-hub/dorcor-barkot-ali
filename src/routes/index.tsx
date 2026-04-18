@@ -46,8 +46,9 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { data } = useSiteData();
 
+  // Wait for the data to be loaded
   if (!data) {
-    return <div>Loading...</div>;
+    return <div style={{ fontFamily: 'sans-serif', textAlign: 'center', padding: '2rem' }}>Loading...</div>;
   }
 
   const schema = {
