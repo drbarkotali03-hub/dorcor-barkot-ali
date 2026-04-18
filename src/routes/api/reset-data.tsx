@@ -1,5 +1,5 @@
 
-import { createFileRoute } from '@tanstack/router';
+import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/api/reset-data')({
   // This action now strictly handles API logic and delegates Firebase logic
