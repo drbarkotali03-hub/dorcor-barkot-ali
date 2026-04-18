@@ -1,22 +1,28 @@
 
-import { APIEvent, json } from '@tanstack/start/server';
-import { getPatients, addPatient } from '@/lib/firebase.server';
+import { Route } from "@tanstack/react-router";
+import { rootRoute } from "../../../root";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { app } from "../../../../firebase";
 
-export async function GET(event: APIEvent) {
-  try {
-    const patients = await getPatients();
-    return json(patients);
-  } catch (error: any) {
-    return json({ error: error.message }, { status: 500 });
-  }
-}
+// Initialize Firestore
+const db = getFirestore(app);
 
-export async function POST(event: APIEvent) {
-  try {
-    const body = await event.request.json();
-    const newPatient = await addPatient({ name: body.name });
-    return json(newPatient, { status: 201 });
-  } catch (error: any) {
-    return json({ error: error.message }, { status: 400 });
-  }
-}
+// A new route for the patient list
+export const patientListRoute = new Route({
+  getParentRoute: () => rootRoute,
+  path: "/api/patients",
+  loader: async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "patients"));
+      const patients = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      return { patients };
+    } catch (error) {
+      console.error("Error fetching patients:", error);
+      // Return an empty array or handle the error as needed
+      return { patients: [] };
+    }
+  },
+});
