@@ -16,8 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-// CORRECT: Import the RPC function for resetting data.
-import { resetDataOnServer } from "@/lib/firebase.server";
+// CORRECTED IMPORT: Use the safe intermediary file.
+import { resetDataOnServer } from "@/lib/server-actions";
 
 
 export const Route = createFileRoute("/admin")({
@@ -208,7 +208,6 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const handleReset = async () => {
     if (confirm("Are you sure you want to reset all data to the default values? This cannot be undone.")) {
       try {
-        // CORRECT: Call the RPC function directly.
         const result = await resetDataOnServer();
         if (!result.success) {
             throw new Error(result.message || "Failed to reset data.");
@@ -307,7 +306,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {active === "qualifications" && <ListEditor items={localData.qualifications} onChange={(v) => updateField("qualifications", v)} label="Qualification" />}
           {active === "memberships" && <ListEditor items={localData.memberships} onChange={(v) => updateField("memberships", v)} label="Membership" />}
           {active === "experience" && <ListEditor items={localData.experience} onChange={(v) => updateField("experience", v)} label="Experience" />}
-          {active === "services" && <ListEditor items={localData.services} onChange={(v) => updateField("services", v)} label="Service" />}
+          {active === "services" && <ListEditor items={localData.services} onChange={(v) => updateDath("services", v)} label="Service" />}
           {active === "gallery" && <GalleryEditor items={localData.gallery} onChange={(v) => updateField("gallery", v)} />}
           {active === "chambers" && <ChambersEditor chambers={localData.chambers} onChange={(v) => updateField("chambers", v)} />}
           {active === "contact" && <ContactEditor contact={localData.contact} onChange={(v) => updateField("contact", v)} />}
