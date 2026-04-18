@@ -1,9 +1,9 @@
 // src/hooks/use-site-data.ts
 import { useState, useEffect, useCallback } from "react";
-import { getData, setData, type SiteData, getDefaultData } from "@/lib/data";
+import { getData, setData, type SiteData, getDefaultSiteData } from "@/lib/data";
 
 export function useSiteData() {
-  const [data, setLocalData] = useState<SiteData>(getDefaultData());
+  const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
