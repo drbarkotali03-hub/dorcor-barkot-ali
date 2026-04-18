@@ -46,6 +46,10 @@ export const Route = createFileRoute("/")({
 function HomePage() {
   const { data } = useSiteData();
 
+  if (!data) {
+    return <div>Loading...</div>;
+  }
+
   const schema = {
     "@context": "https://schema.org",
     "@type": "Physician",
