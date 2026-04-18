@@ -2,7 +2,8 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type SiteData, siteDataSchema, getDefaultSiteData } from "@/lib/data";
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+// Correcting the import path to the single source of truth for Firebase
+import { db } from "@/firebase";
 
 const fetchSiteData = async (): Promise<SiteData> => {
   try {
