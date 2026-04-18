@@ -1,4 +1,4 @@
-'''
+
 import { createServerFn } from '@tanstack/start/server';
 import admin from 'firebase-admin';
 import { siteDataSchema, type SiteData, getDefaultSiteData } from '@/lib/data';
@@ -26,19 +26,6 @@ export function initializeFirebaseAdmin() {
   }
   return admin.database();
 }
-
-// This function will also only be imported on the server
-export const saveDataToServer = createServerFn(
-  'POST',
-  async () => {
-    'use server';
-    // The data is automatically passed from the client by createServerFn
-    // We need to get it from the request context
-    // This is a placeholder, as the actual data passing is handled by the framework
-    // The function passed to createServerFn receives the arguments from the client call.
-    // Let's adjust this.
-  }
-);
 
 export const resetDataOnServer = createServerFn('POST', async () => {
   'use server';
@@ -72,5 +59,3 @@ const saveFn = async (data: SiteData) => {
 };
 
 export const newSaveDataToServer = createServerFn('POST', saveFn);
-
-'''
