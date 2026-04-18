@@ -196,20 +196,16 @@ export function ChambersEditor({ chambers, onChange }: { chambers: Chamber[]; on
             <label className="text-sm font-medium text-foreground">Schedule (one per line)</label>
             <textarea
               className="admin-input mt-1 min-h-[80px]"
-              value={c.schedule.join("
-")}
-              onChange={(e) => update(i, { schedule: e.target.value.split("
-") })}
+              value={c.schedule.join("\n")}
+              onChange={(e) => update(i, { schedule: e.target.value.split("\n") })}
             />
           </div>
           <div>
             <label className="text-sm font-medium text-foreground">Phones (one per line)</label>
             <textarea
               className="admin-input mt-1 min-h-[60px]"
-              value={c.phones.join("
-")}
-              onChange={(e) => update(i, { phones: e.target.value.split("
-").filter(Boolean) })}
+              value={c.phones.join("\n")}
+              onChange={(e) => update(i, { phones: e.target.value.split("\n").filter(Boolean) })}
             />
           </div>
         </div>
