@@ -1,5 +1,8 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build && cp dist/client/index.html dist/client/404.html",
+  "outputDirectory": "dist/client",
   "installCommand": "npm install",
-  "framework": "vite"
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }
