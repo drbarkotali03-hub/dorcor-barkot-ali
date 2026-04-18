@@ -5,18 +5,39 @@ import { db } from "@/firebase";
 
 const REPO_URL = "https://github.com/drbarkotali03-hub/dorcor-barkot-ali";
 
+// Helper for URL validation and transformation
+const urlSchema = z.preprocess(
+  (arg) => {
+    if (typeof arg === 'string' && arg.trim() && !arg.startsWith('http')) {
+      return `https://${arg.trim()}`;
+    }
+    return arg;
+  },
+  z.string().url().trim()
+);
+
+const optionalUrlSchema = z.preprocess(
+  (arg) => {
+    if (typeof arg === 'string' && arg.trim() && !arg.startsWith('http')) {
+      return `https://${arg.trim()}`;
+    }
+    return arg;
+  },
+  z.string().url().trim().optional().or(z.literal('')) // Allow empty string and make it optional
+);
+
 export const siteDataSchema = z.object({
   doctor: z.object({
     name: z.string(),
     title: z.string(),
     bmdc: z.string(),
-    imageUrl: z.string().url(),
+    imageUrl: urlSchema,
     intro: z.string(),
   }),
   qualifications: z.array(z.string()),
   memberships: z.array(z.string()),
   services: z.array(z.string()),
-  experience: z.array(z.string()).optional(), // Made optional for safety
+  experience: z.array(z.string()).optional(),
   chambers: z.array(
     z.object({
       id: z.string(),
@@ -25,29 +46,29 @@ export const siteDataSchema = z.object({
       schedule: z.array(z.string()),
       phones: z.array(z.string()),
       hotline: z.string().optional(),
-      website: z.string().optional(),
-      facebook: z.string().optional(),
+      website: optionalUrlSchema,
+      facebook: optionalUrlSchema,
       mapQuery: z.string(),
-      googleMapsLink: z.string().url().optional(),
-      embedMapLink: z.string().url().optional(),
+      googleMapsLink: optionalUrlSchema,
+      embedMapLink: optionalUrlSchema,
     })
   ),
   gallery: z.array(
     z.object({
       id: z.string(),
-      imageUrl: z.string().url(),
+      imageUrl: urlSchema,
       caption: z.string(),
     })
   ),
   contact: z.object({
     whatsappNumbers: z.array(z.string()),
     phoneNumbers: z.array(z.string()),
-    website: z.string().url(),
-    facebook: z.string().url(),
+    website: urlSchema,
+    facebook: urlSchema,
   }),
   settings: z.object({
     siteTitle: z.string(),
-    logo: z.string().url(),
+    logo: urlSchema,
     adminPassword: z.string(),
   }),
 });
@@ -101,6 +122,9 @@ export function getDefaultSiteData(): SiteData {
         mapQuery: "Khadija Villa Daulatpur Khulna",
         googleMapsLink: "https://maps.app.goo.gl/u5Kzv5Gz8jCHaQd56",
         embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3676.8344265934503!2d89.5398363759914!3d22.844937222855584!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff9aac91a55555%3A0x15a6b5870425010e!2sKhadija%20Villa!5e0!3m2!1sen!2sbd!4v1713432791459!5m2!1sen!2sbd",
+        website: "",
+        facebook: "",
+        hotline: "",
       },
       {
         id: "2",
@@ -113,7 +137,7 @@ export function getDefaultSiteData(): SiteData {
         phones: [],
         hotline: "09666787821",
         website: "www.populardiagnostic.com",
-				facebook: "facebook.com/populardiagnostickhulna",
+		facebook: "facebook.com/populardiagnostickhulna",
         mapQuery: "Popular Diagnostic Centre Khulna",
         googleMapsLink: "https://maps.app.goo.gl/5rCgCpmWpU3x1jBE7",
         embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3677.669527923759!2d89.55393937599049!3d22.81439992524385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff901b351de589%3A0x6331a9b89ce32918!2sPopular%20Diagnostic%20Centre%2C%20Khulna!5e0!3m2!1sen!2sbd!4v1713432864708!5m2!1sen!2sbd",
@@ -123,7 +147,7 @@ export function getDefaultSiteData(): SiteData {
     contact: {
       whatsappNumbers: ["01712-050951"],
       phoneNumbers: ["01784-032951"],
-      website: new URL(REPO_URL).hostname,
+      website: "drbarkotali.com",
       facebook: "facebook.com/drbarkotali",
     },
     settings: {
