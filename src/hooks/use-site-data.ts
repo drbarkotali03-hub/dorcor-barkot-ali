@@ -2,8 +2,6 @@
 // src/hooks/use-site-data.ts
 import { useState, useEffect, useCallback } from "react";
 import { getData, type SiteData, getDefaultSiteData } from "@/lib/data";
-// CORRECTED IMPORT: Use the safe intermediary file.
-import { newSaveDataToServer } from "@/lib/server-actions";
 
 export function useSiteData() {
   const [data, setLocalData] = useState<SiteData>(getDefaultSiteData());
@@ -29,16 +27,27 @@ export function useSiteData() {
 
   const updateData = useCallback(async (newData: SiteData) => {
     try {
-      const result = await newSaveDataToServer(newData);
-      if (!result.success) {
-        throw new Error(result.message);
+      const response = await fetch('/api/save-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || !result.success) {
+        throw new Error(result.message || "Failed to save data on server.");
       }
-      setLocalData(newData);
+      
+      setLocalData(newData); // Update local state on success
+
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
       setError(`Failed to save data: ${errorMessage}`);
       console.error(e);
-      throw e;
+      throw e; // Re-throw to inform the caller (e.g., the Admin page)
     }
   }, []);
 
