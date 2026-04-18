@@ -159,9 +159,3 @@ export async function setData(data: SiteData): Promise<void> {
     throw error; // Re-throw the error to be handled by the caller
   }
 }
-
-export async function resetData(): Promise<SiteData> {
-    const defaultData = getDefaultSiteData();
-    await setData(defaultData);
-    return defaultData;
-}

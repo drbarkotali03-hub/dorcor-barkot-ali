@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
 import { useSiteData } from "@/hooks/use-site-data";
-import { resetData, type SiteData } from "@/lib/data";
+import { type SiteData } from "@/lib/data";
 import {
   User, GraduationCap, Briefcase, Heart, MapPin, Phone, Settings,
   Save, RotateCcw, LogOut, Sun, Moon, ChevronLeft, Menu, X, Check,
@@ -206,10 +206,14 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const handleReset = async () => {
     if (confirm("Are you sure you want to reset all data to the default values? This cannot be undone.")) {
       try {
-        await resetData();
+        const response = await fetch("/api/reset-data", { method: "POST" });
+        const result = await response.json();
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || "Failed to reset data.");
+        }
         refetch(); // Refetch data to update the UI
       } catch (err) {
-        alert("Error resetting data. Please try again.");
+        alert(`Error resetting data: ${err.message}`);
       }
     }
   };

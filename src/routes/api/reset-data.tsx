@@ -1,8 +1,7 @@
 
-import { createFileRoute } from '@tanstack/react-router';
-import type { SiteData } from '@/lib/data';
+import { createFileRoute } from '@tanstack/router';
 
-export const Route = createFileRoute('/api/save-data')({
+export const Route = createFileRoute('/api/reset-data')({
   // This action now strictly handles API logic and delegates Firebase logic
   action: async ({ request }) => {
     if (request.method !== 'POST') {
@@ -13,20 +12,18 @@ export const Route = createFileRoute('/api/save-data')({
     }
 
     try {
-      const data: SiteData = await request.json();
-
       // Dynamically import the server-only function
-      const { saveDataToServer } = await import('@/lib/firebase.server');
+      const { resetDataOnServer } = await import('@/lib/firebase.server');
 
       // Call the server function to handle the database interaction
-      await saveDataToServer(data);
+      await resetDataOnServer();
 
-      return new Response(JSON.stringify({ success: true, message: 'Data saved successfully.' }), {
+      return new Response(JSON.stringify({ success: true, message: 'Data reset successfully.' }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
       });
     } catch (error: any) {
-      console.error('[API Error] /api/save-data:', error);
+      console.error('[API Error] /api/reset-data:', error);
       return new Response(JSON.stringify({ success: false, message: error.message || 'An unknown server error occurred.' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -34,4 +31,3 @@ export const Route = createFileRoute('/api/save-data')({
     }
   },
 });
-
