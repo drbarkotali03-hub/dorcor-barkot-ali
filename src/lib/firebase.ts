@@ -1,7 +1,7 @@
 // lib/firebase.ts - Firebase Configuration
 // Initialize Firebase with environment variables
 
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
 import { getDatabase } from "firebase/database";
 
@@ -17,8 +17,8 @@ const firebaseConfig = {
   databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if it hasn't been initialized yet
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Initialize Realtime Database
 const db = getDatabase(app);
