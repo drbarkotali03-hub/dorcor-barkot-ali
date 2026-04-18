@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -37,10 +39,9 @@ function PatientsEditor() {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch('/api/patients');
-      if (!response.ok) throw new Error('Failed to fetch patients');
-      const data = await response.json();
-      setPatients(data);
+      const querySnapshot = await getDocs(collection(db, 'patients'));
+      const patientsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPatients(patientsData);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -55,12 +56,7 @@ function PatientsEditor() {
   const handleAddPatient = async () => {
     if (newPatientName.trim() === "") return;
     try {
-      const response = await fetch('/api/patients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: newPatientName.trim() }),
-      });
-      if (!response.ok) throw new Error('Failed to add patient');
+      await addDoc(collection(db, 'patients'), { name: newPatientName.trim() });
       setNewPatientName("");
       fetchPatients(); // Refresh the list
     } catch (err: any) {
@@ -71,8 +67,7 @@ function PatientsEditor() {
   const handleDeletePatient = async (id: string) => {
     if (!confirm("Are you sure you want to delete this patient?")) return;
     try {
-      const response = await fetch(`/api/patients/${id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete patient');
+      await deleteDoc(doc(db, 'patients', id));
       fetchPatients(); // Refresh the list
     } catch (err: any) {
       setError(err.message);

@@ -1,20 +1,20 @@
 // lib/firebase.ts - Firebase Configuration
-// Initialize Firebase with environment variables
+// Initialize Firebase with configuration
 
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAnalytics, Analytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 
-// Firebase configuration from environment variables
+// Firebase configuration
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  apiKey: "AIzaSyBOIyDRJ8WFswTudCGNfDoCa7sw82kUeek",
+  authDomain: "de-barkot-ali-web.firebaseapp.com",
+  databaseURL: "https://de-barkot-ali-web-default-rtdb.firebaseio.com",
+  projectId: "de-barkot-ali-web",
+  storageBucket: "de-barkot-ali-web.firebasestorage.app",
+  messagingSenderId: "392212737235",
+  appId: "1:392212737235:web:9018d9f385f4332ce17826",
+  measurementId: "G-EFFCTX7JEW"
 };
 
 // Initialize Firebase only if it hasn't been initialized yet

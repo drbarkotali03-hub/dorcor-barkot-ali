@@ -1,46 +1,20 @@
 
-import { createServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { type SiteData, siteDataSchema, getDefaultSiteData } from "@/lib/data";
-import admin from 'firebase-admin';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-const initializeFirebaseAdmin = () => {
-  if (admin.apps.length > 0) {
-    return admin.firestore();
-  }
-
-  const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
-  if (!serviceAccountString) {
-    throw new Error('CRITICAL: FIREBASE_ADMIN_SDK_CONFIG environment variable is not set.');
-  }
-
+const fetchSiteData = async (): Promise<SiteData> => {
   try {
-    const serviceAccount = JSON.parse(serviceAccountString);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
-  } catch (e: any) {
-    throw new Error(`Failed to parse Firebase service account JSON: ${e.message}`);
-  }
+    const docRef = doc(db, 'site', 'data');
+    const docSnap = await getDoc(docRef);
 
-  return admin.firestore();
-};
-
-const getSiteDataRef = () => {
-  const db = initializeFirebaseAdmin();
-  return db.collection('site').doc('data');
-};
-
-const fetchSiteData = createServerFn("GET", async (): Promise<SiteData> => {
-  try {
-    const doc = await getSiteDataRef().get();
-
-    if (!doc.exists) {
+    if (!docSnap.exists()) {
       console.log("No site data found in Firestore, returning default data.");
       return getDefaultSiteData();
     }
 
-    const data = doc.data();
+    const data = docSnap.data();
     // Validate data against schema, return default on failure
     const parsed = siteDataSchema.safeParse(data);
     if (parsed.success) {
@@ -51,55 +25,68 @@ const fetchSiteData = createServerFn("GET", async (): Promise<SiteData> => {
     }
   } catch (error) {
     console.error("Error fetching from Firestore:", error);
-    // In case of a critical error (e.g., config issue), re-throw it so the client can see it.
-    if (error instanceof Error && error.message.startsWith('CRITICAL:')) {
-      throw error;
-    }
-    // For other errors, return default data to keep the site running.
+    // For errors, return default data to keep the site running.
     return getDefaultSiteData();
   }
-});
+};
 
-const saveData = createServerFn("POST", async (data: SiteData) => {
+const saveData = async (data: SiteData) => {
   try {
     // Ensure data is valid before saving
     const validatedData = siteDataSchema.parse(data);
-    await getSiteDataRef().set(validatedData, { merge: true }); // Use set with merge to be safe
+    const docRef = doc(db, 'site', 'data');
+    await setDoc(docRef, validatedData, { merge: true }); // Use set with merge to be safe
     return { success: true, message: 'Data saved successfully to Firestore.' };
   } catch (error: any) {
     console.error('[Firestore Error] Failed to save data:', error);
     return { success: false, message: error.message || 'Failed to save data.' };
   }
-});
+};
 
-const resetData = createServerFn("POST", async () => {
+const resetData = async () => {
   try {
     const defaultData = getDefaultSiteData();
+    const docRef = doc(db, 'site', 'data');
     // Overwrite the document with the default data
-    await getSiteDataRef().set(defaultData);
+    await setDoc(docRef, defaultData);
     return { success: true, message: 'Data reset to default successfully.' };
   } catch (error: any) {
     console.error('[Firestore Error] Failed to reset data:', error);
     return { success: false, message: error.message || 'Failed to reset data.' };
   }
-});
+};
 
 export function useSiteData() {
+  const queryClient = useQueryClient();
+
   const { data, ...rest } = useQuery({
     queryKey: ["site-data"],
-    queryFn: async () => {
-        const data = await fetchSiteData();
-        return data
-    },
+    queryFn: fetchSiteData,
     // Stale-while-revalidate strategy
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: true,
   });
 
+  const saveMutation = useMutation({
+    mutationFn: saveData,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-data"] });
+    },
+  });
+
+  const resetMutation = useMutation({
+    mutationFn: resetData,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["site-data"] });
+    },
+  });
+
   return {
     data: data || getDefaultSiteData(), // Ensure data is never undefined
-    saveData,
-    resetData,
-    ...rest,
+    loading: rest.isLoading,
+    error: rest.error,
+    refetch: rest.refetch,
+    saveData: saveMutation.mutateAsync,
+    resetData: resetMutation.mutateAsync,
   };
 }
