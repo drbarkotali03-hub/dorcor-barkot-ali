@@ -136,8 +136,8 @@ export function getDefaultSiteData(): SiteData {
         ],
         phones: [],
         hotline: "09666787821",
-        website: "www.populardiagnostic.com",
-				facebook: "facebook.com/populardiagnostickhulna",
+        website: "https://www.populardiagnostic.com",
+				facebook: "https://facebook.com/populardiagnostickhulna",
         mapQuery: "Popular Diagnostic Centre Khulna",
         googleMapsLink: "https://maps.app.goo.gl/23JJEcRD4XxzNuon8",
         embedMapLink: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3677.669527923759!2d89.55393937599049!3d22.81439992524385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39ff901b351de589%3A0x6331a9b89ce32918!2sPopular%20Diagnostic%20Centre%2C%20Khulna!5e0!3m2!1sen!2sbd!4v1713432864708!5m2!1sen!2sbd",
@@ -147,8 +147,8 @@ export function getDefaultSiteData(): SiteData {
     contact: {
       whatsappNumbers: ["01712-050951"],
       phoneNumbers: ["01784-032951"],
-      website: "drbarkotali.com",
-      facebook: "facebook.com/drbarkotali",
+      website: "https://drbarkotali.com",
+      facebook: "https://facebook.com/drbarkotali",
     },
     settings: {
       siteTitle: "Dr. Barkot Ali - Child Specialist Khulna",
