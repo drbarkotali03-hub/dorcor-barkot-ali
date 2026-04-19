@@ -41,7 +41,7 @@ export function Navbar() {
           <img
             src={data.settings.logo}
             alt={`${data.doctor.name} Child Specialist Khulna`}
-            className="h-10 w-10 rounded-full object-cover ring-2 ring-primary/20"
+            className="h-10 w-10 max-w-full rounded-full object-contain ring-2 ring-primary/20"
           />
           <div className="hidden sm:block">
             <span className="font-heading text-base font-bold text-foreground leading-tight block">

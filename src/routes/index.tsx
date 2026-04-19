@@ -37,6 +37,7 @@ export const Route = createFileRoute("/")({
         property: "og:image",
         content: "https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png",
       },
+      { name: "twitter:image", content: "https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),

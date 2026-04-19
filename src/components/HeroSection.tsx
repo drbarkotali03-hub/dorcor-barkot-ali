@@ -64,7 +64,7 @@ export function HeroSection({ data }: { data: SiteData }) {
             <img
               src="https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png"
               alt="Dr Barkot Ali Child Specialist Khulna"
-              className="relative w-full max-w-[400px] h-auto rounded-[2rem] object-cover shadow-2xl ring-1 ring-primary/10"
+              className="relative w-full max-w-[400px] h-auto rounded-[2rem] object-contain shadow-2xl ring-1 ring-primary/10"
             />
           </div>
         </motion.div>
