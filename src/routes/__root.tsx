@@ -44,6 +44,7 @@ export const Route = createRootRoute({
       { name: "twitter:description", content: "Professor Dr. Md. Barkot Ali – Leading Child & Adolescent Health Specialist in Khulna, Bangladesh." },
     ],
     links: [
+      { rel: "icon", href: "https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" as const },
