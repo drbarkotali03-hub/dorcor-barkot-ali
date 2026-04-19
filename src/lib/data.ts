@@ -1,4 +1,3 @@
-
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { z } from "zod";
 import { db } from "@/firebase";
