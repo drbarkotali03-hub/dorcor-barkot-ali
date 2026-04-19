@@ -159,7 +159,7 @@ function AdminPage() {
         <div className="glass-card w-full max-w-sm p-8">
           <div className="text-center mb-8">
             <img
-              src="https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png"
+              src="https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png"
               alt="Dr Barkot Ali Child Specialist Khulna"
               className="mx-auto h-16 w-16 rounded-full object-cover mb-4"
             />
@@ -321,7 +321,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           {active === "doctor" && <DoctorEditor data={localData.doctor} onChange={(d) => updateField("doctor", d)} />}
           {active === "qualifications" && <ListEditor items={localData.qualifications} onChange={(v) => updateField("qualifications", v)} label="Qualification" />}
           {active === "memberships" && <ListEditor items={localData.memberships} onChange={(v) => updateField("memberships", v)} label="Membership" />}
-          {active === "experience" && <ListEditor items={localData.experience} onChange={(v) => updateField("experience", v)} label="Experience" />}
+          {active === "experience" && <ListEditor items={localData.experience || []} onChange={(v) => updateField("experience", v)} label="Experience" />}
           {active === "services" && <ListEditor items={localData.services} onChange={(v) => updateField("services", v)} label="Service" />}
           {active === "gallery" && <GalleryEditor items={localData.gallery} onChange={(v) => updateField("gallery", v)} />}
           {active === "chambers" && <ChambersEditor chambers={localData.chambers} onChange={(v) => updateField("chambers", v)} />}

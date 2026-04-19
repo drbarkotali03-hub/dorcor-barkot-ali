@@ -12,7 +12,7 @@ import {
   Building,
   ExternalLink,
 } from "lucide-react";
-import Link from "next/link";
+import { Link } from "@tanstack/react-router";
 
 const getGoogleMapsLink = (chamber: { googleMapsLink?: string; mapQuery: string }) => {
   if (chamber.googleMapsLink?.trim()) {
@@ -117,7 +117,7 @@ export default function ChamberCard({ chamber, className }: ChamberCardProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-auto">
           <Button asChild className="w-full">
-            <Link href="/appointment">
+            <Link to="/">
               <Calendar className="w-4 h-4 mr-2" />
               Book Appointment
             </Link>
