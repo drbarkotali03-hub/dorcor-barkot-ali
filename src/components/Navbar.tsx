@@ -30,10 +30,10 @@ export function Navbar() {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`sticky top-0 left-0 right-0 z-50 transition-all duration-500 backdrop-blur-lg ${
         scrolled
-          ? "glass-card rounded-none border-x-0 border-t-0"
-          : "bg-transparent"
+          ? "bg-white/80 shadow-xl border-b border-gray-100"
+          : "bg-white/10 shadow-sm border-b border-transparent"
       }`}
     >
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 sm:px-6">
