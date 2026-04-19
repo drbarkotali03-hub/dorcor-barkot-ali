@@ -23,16 +23,23 @@ export default function ChamberCard({ chamber, className }: ChamberCardProps) {
     <Card className={cn("flex flex-col", className)} key={chamber.id}>
       <div className="w-full aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
         {chamber.embedMapLink ? (
-          <iframe
-            src={chamber.embedMapLink}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+          <a
+            href={chamber.googleMapsLink || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full h-full absolute top-0 left-0"
-          ></iframe>
+          >
+            <iframe
+              src={chamber.embedMapLink}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full h-full pointer-events-none"
+            ></iframe>
+          </a>
         ) : (
           <Building className="w-16 h-16 text-muted-foreground" />
         )}
