@@ -13,6 +13,7 @@ import { ChambersSection } from "@/components/ChambersSection";
 import { ContactSection, Footer } from "@/components/ContactSection";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { useSiteData } from "@/hooks/use-site-data";
+import GoogleMap from "@/components/GoogleMap"; // Import the new component
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -68,6 +69,7 @@ function HomePage() {
   };
 
   const floatingWa = data.contact.whatsappNumbers?.[0];
+  const mapUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3651.902442430138!2d90.3903140759656!3d23.7508581887627!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8bd55555555%3A0x1d4a8d9a9f4c3b2!2sPanpacific%20Sonargaon%20Dhaka!5e0!3m2!1sen!2sbd!4v1713545000000!5m2!1sen!2sbd";
 
   return (
     <>
@@ -85,6 +87,15 @@ function HomePage() {
         <ServicesSection data={data} />
         <GallerySection data={data} />
         <ChambersSection data={data} />
+
+        {/* New Google Map Section Added Here */}
+        <section id="location" className="py-12 md:py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-8">Our Location</h2>
+            <GoogleMap embedUrl={mapUrl} />
+          </div>
+        </section>
+
         <ContactSection data={data} />
       </main>
       <Footer data={data} />
