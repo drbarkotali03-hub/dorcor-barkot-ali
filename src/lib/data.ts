@@ -152,7 +152,7 @@ export function getDefaultSiteData(): SiteData {
     },
     settings: {
       siteTitle: "Dr. Barkot Ali - Child Specialist Khulna",
-      logo: `https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png`,
+      logo: `https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png`,
       adminPassword: "Barkot Ali",
     },
   };
