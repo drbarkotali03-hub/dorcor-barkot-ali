@@ -14,113 +14,120 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-interface ChamberCardProps extends React.HTMLAttributes<HTMLDivElement> {
+type ChamberCardProps = {
   chamber: Chamber;
+  className?: string;
+};
+
+function formatPhoneNumber(phone: string) {
+  const cleaned = phone.replace(/\D/g, "");
+  if (cleaned.startsWith("88")) {
+    return `+${cleaned}`;
+  }
+  if (cleaned.length === 11 && cleaned.startsWith("0")) {
+    return `+88${cleaned}`;
+  }
+  return phone;
 }
 
-export default function ChamberCard({ chamber, className }: ChamberCardProps) {
+export function ChamberCard({ chamber, className }: ChamberCardProps) {
   return (
-    <Card className={cn("flex flex-col", className)} key={chamber.id}>
-      <div className="w-full aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
-        {chamber.embedMapLink ? (
-          <a
-            href={chamber.googleMapsLink || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full h-full absolute top-0 left-0"
-          >
+    <Card
+      className={cn(
+        "flex flex-col overflow-hidden rounded-2xl border-2 border-gray-100 shadow-lg transition-transform duration-300 hover:shadow-2xl hover:-translate-y-1",
+        className
+      )}
+    >
+      {chamber.embedMapLink && (
+        <a
+          href={chamber.googleMapsLink || "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block aspect-video overflow-hidden border-b-2 cursor-pointer group"
+          aria-label={`View ${chamber.name} on Google Maps`}
+        >
+          <div className="relative w-full h-full">
             <iframe
               src={chamber.embedMapLink}
-              width="100%"
-              height="100%"
-              style={{ border: 0 }}
-              allowFullScreen={true}
+              className="w-full h-full pointer-events-none" // Prevents iframe from capturing clicks
+              allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
-              className="w-full h-full pointer-events-none"
             ></iframe>
-          </a>
-        ) : (
-          <Building className="w-16 h-16 text-muted-foreground" />
-        )}
-      </div>
-      <div className="p-6 flex flex-col flex-grow">
-        <h3 className="text-2xl font-bold mb-4 min-h-16">{chamber.name}</h3>
-        <div className="space-y-3 mb-6 text-muted-foreground flex-grow">
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-colors duration-300 flex items-center justify-center">
+              <div className="p-2 bg-white/80 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 scale-90 group-hover:scale-100 transform">
+                <ExternalLink className="text-gray-800" size={24} />
+              </div>
+            </div>
+          </div>
+        </a>
+      )}
+
+      <div className="flex-1 p-6 bg-white">
+        <h3 className="flex items-center gap-2 text-2xl font-bold text-gray-800 mb-3">
+          <Building size={24} className="text-primary" />
+          {chamber.name}
+        </h3>
+        <div className="space-y-4 text-gray-600">
           <div className="flex items-start gap-3">
-            <MapPin className="w-5 h-5 mt-1 flex-shrink-0" />
-            <span>{chamber.address}</span>
+            <MapPin className="h-5 w-5 mt-1 text-gray-400 flex-shrink-0" />
+            <p>{chamber.address}</p>
           </div>
           <div className="flex items-start gap-3">
-            <Clock className="w-5 h-5 mt-1 flex-shrink-0" />
-            <div className="flex flex-col">
-              {chamber.schedule.map((line) => (
-                <span key={line}>{line}</span>
+            <Clock className="h-5 w-5 mt-1 text-gray-400 flex-shrink-0" />
+            <div>
+              {chamber.schedule.map((line, index) => (
+                <p key={index} className="leading-snug">{line}</p>
               ))}
             </div>
           </div>
-          {(chamber.phones?.length || 0) > 0 && (
-            <div className="flex items-start gap-3">
-              <Phone className="w-5 h-5 mt-1 flex-shrink-0" />
-              <div className="flex flex-col">
-                {chamber.phones?.map((phone) => (
-                  <a key={phone} href={`tel:${phone}`}>
-                    {phone}
-                  </a>
-                ))}
-              </div>
-            </div>
-          )}
-          {chamber.hotline && (
-            <div className="flex items-start gap-3">
-              <Phone className="w-5 h-5 mt-1 flex-shrink-0" />
-              <a href={`tel:${chamber.hotline}`}>
-                <span className="font-bold">Hotline: {chamber.hotline}</span>
-              </a>
-            </div>
-          )}
-          {chamber.website && (
-            <div className="flex items-start gap-3">
-              <Globe className="w-5 h-5 mt-1 flex-shrink-0" />
-              <a
-                href={chamber.website}
-                target="_blank"
-                className="hover:underline flex items-center gap-1"
-              >
-                {chamber.website.replace(/^(https?:\/\/)?(www\.)?/, "")}
-                <ExternalLink className="w-4 h-4" />
-              </a>
-            </div>
-          )}
-          {chamber.facebook && (
-            <div className="flex items-start gap-3">
-              <Facebook className="w-5 h-5 mt-1 flex-shrink-0" />
-              <a
-                href={chamber.facebook}
-                target="_blank"
-                className="hover:underline"
-              >
-                Facebook Page
-              </a>
-            </div>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-auto">
-          <Button asChild className="w-full">
-            <Link href="/appointment">
-              <Calendar className="w-4 h-4 mr-2" />
-              Book Appointment
-            </Link>
-          </Button>
-          <Button asChild className="w-full" variant="outline">
-            <a href={chamber.googleMapsLink || "#"} target="_blank">
-              <MapPin className="w-4 h-4 mr-2" />
-              View on Map
-            </a>
-          </Button>
+          {chamber.hotline && (
+            <div className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-gray-400 flex-shrink-0" />
+              <Link
+                href={`tel:${formatPhoneNumber(chamber.hotline)}`}
+                className="font-semibold text-primary hover:underline"
+              >
+                Hotline: {chamber.hotline}
+              </Link>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-4 pt-2">
+            {chamber.website && (
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <Link href={chamber.website} target="_blank">
+                  <Globe size={16} /> Website
+                </Link>
+              </Button>
+            )}
+            {chamber.facebook && (
+              <Button asChild variant="outline" size="sm" className="gap-2">
+                <Link href={chamber.facebook} target="_blank">
+                  <Facebook size={16} /> Facebook
+                </Link>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
+      {(chamber.phones?.length ?? 0) > 0 && (
+        <div className="border-t-2 bg-gray-50 px-6 py-4">
+          <p className="text-sm font-semibold text-gray-500 mb-2">For Serial:</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            {chamber.phones.map((phone) => (
+              <Link
+                href={`tel:${formatPhoneNumber(phone)}`}
+                key={phone}
+                className="text-base font-medium text-blue-600 hover:text-blue-800 hover:underline"
+              >
+                {phone}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
