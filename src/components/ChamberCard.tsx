@@ -14,6 +14,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+const getGoogleMapsLink = (chamber: { googleMapsLink?: string; mapQuery: string }) => {
+  if (chamber.googleMapsLink?.trim()) {
+    return chamber.googleMapsLink.trim();
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(chamber.mapQuery)}`;
+};
+
 interface ChamberCardProps extends React.HTMLAttributes<HTMLDivElement> {
   chamber: Chamber;
 }
@@ -21,18 +28,27 @@ interface ChamberCardProps extends React.HTMLAttributes<HTMLDivElement> {
 export default function ChamberCard({ chamber, className }: ChamberCardProps) {
   return (
     <Card className={cn("flex flex-col", className)} key={chamber.id}>
-      <div className="w-full aspect-video bg-muted flex items-center justify-center relative overflow-hidden">
+      <div className="relative w-full aspect-video bg-muted flex items-center justify-center overflow-hidden">
         {chamber.embedMapLink ? (
-          <iframe
-            src={chamber.embedMapLink}
-            width="100%"
-            height="100%"
-            style={{ border: 0 }}
-            allowFullScreen={true}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="w-full h-full absolute top-0 left-0"
-          ></iframe>
+          <>
+            <a
+              href={getGoogleMapsLink(chamber)}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Open ${chamber.name} in Google Maps`}
+              className="absolute inset-0 z-10"
+            />
+            <iframe
+              src={chamber.embedMapLink}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen={true}
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="w-full h-full absolute top-0 left-0"
+            ></iframe>
+          </>
         ) : (
           <Building className="w-16 h-16 text-muted-foreground" />
         )}
@@ -107,7 +123,7 @@ export default function ChamberCard({ chamber, className }: ChamberCardProps) {
             </Link>
           </Button>
           <Button asChild className="w-full" variant="outline">
-            <a href={chamber.googleMapsLink || "#"} target="_blank">
+            <a href={getGoogleMapsLink(chamber)} target="_blank" rel="noopener noreferrer">
               <MapPin className="w-4 h-4 mr-2" />
               View on Map
             </a>

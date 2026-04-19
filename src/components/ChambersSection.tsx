@@ -4,6 +4,13 @@ import type { SiteData } from "@/lib/data";
 
 const WA_LINK = "https://wa.me/8801712050951?text=Hello%20Dr.%20Barkot%20Ali%2C%20I%20would%20like%20to%20book%20an%20appointment.";
 
+const getGoogleMapsLink = (chamber: { googleMapsLink?: string; mapQuery: string }) => {
+  if (chamber.googleMapsLink?.trim()) {
+    return chamber.googleMapsLink.trim();
+  }
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(chamber.mapQuery)}`;
+};
+
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.15, duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number] } }),
@@ -29,7 +36,14 @@ export function ChambersSection({ data }: { data: SiteData }) {
           >
             {/* Map */}
             {chamber.embedMapLink && (
-              <div className="h-48 w-full bg-muted/50 overflow-hidden">
+              <div className="relative h-48 w-full bg-muted/50 overflow-hidden">
+                <a
+                  href={getGoogleMapsLink(chamber)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute inset-0 z-10"
+                  aria-label={`Open ${chamber.name} in Google Maps`}
+                />
                 <iframe
                   title={`Map of ${chamber.name}`}
                   src={chamber.embedMapLink}
@@ -95,8 +109,8 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp flex-1 justify-center text-sm py-3">
                   <MessageCircle className="h-4 w-4" /> Book Appointment
                 </a>
-                {chamber.googleMapsLink && (
-                  <a href={chamber.googleMapsLink} target="_blank" rel="noopener noreferrer" className="btn-secondary flex-1 justify-center text-sm py-3">
+                {(chamber.googleMapsLink || chamber.mapQuery) && (
+                  <a href={getGoogleMapsLink(chamber)} target="_blank" rel="noopener noreferrer" className="btn-secondary flex-1 justify-center text-sm py-3">
                     <MapPin className="h-4 w-4" /> View on Map
                   </a>
                 )}
