@@ -83,7 +83,7 @@ export function getDefaultSiteData(): SiteData {
       name: "Professor Dr. Md. Barkot Ali",
       title: "MBBS, FCPS (Pediatrics), MD (Neonatology)",
       bmdc: "A-28256",
-      imageUrl: `https://i.postimg.cc/L56KVndw/Generated-Image-April-16-2026-3-49AM.png`,
+      imageUrl: `https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png`,
       intro:
         "Dr. Md. Barkot Ali is a distinguished Child Specialist with extensive experience in pediatrics and neonatology. He is dedicated to providing the highest quality care for children, from newborns to adolescents. With a focus on compassionate and comprehensive treatment, Dr. Ali ensures the well-being of every child he sees.",
     },
