@@ -83,8 +83,8 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 {chamber.website && (
                   <div className="flex items-center gap-3 text-muted-foreground">
                     <Globe className="h-4 w-4 shrink-0 text-primary" />
-                    <a href={`https://${chamber.website}`} target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">
-                      {chamber.website} <ExternalLink className="inline h-3 w-3" />
+                    <a href={chamber.website} target="_blank" rel="noopener noreferrer" className="text-primary font-medium hover:underline">
+                      {chamber.website.replace(/^https?:\/\//, '')} <ExternalLink className="inline h-3 w-3" />
                     </a>
                   </div>
                 )}
@@ -95,7 +95,7 @@ export function ChambersSection({ data }: { data: SiteData }) {
                 <a href={WA_LINK} target="_blank" rel="noopener noreferrer" className="btn-whatsapp flex-1 justify-center text-sm py-3">
                   <MessageCircle className="h-4 w-4" /> Book Appointment
                 </a>
-                {chamber.googleMapsLink && !chamber.embedMapLink && (
+                {chamber.googleMapsLink && (
                   <a href={chamber.googleMapsLink} target="_blank" rel="noopener noreferrer" className="btn-secondary flex-1 justify-center text-sm py-3">
                     <MapPin className="h-4 w-4" /> View on Map
                   </a>
