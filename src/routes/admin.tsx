@@ -161,7 +161,7 @@ function AdminPage() {
             <img
               src="https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png"
               alt="Dr Barkot Ali Child Specialist Khulna"
-              className="mx-auto h-16 w-16 rounded-full object-cover mb-4"
+              className="mx-auto h-16 w-16 max-w-full rounded-full object-cover mb-4"
             />
             <h2 className="text-xl font-bold text-foreground">Admin Login</h2>
             <p className="text-sm text-muted-foreground mt-1">Enter your credentials</p>

@@ -56,15 +56,15 @@ export function HeroSection({ data }: { data: SiteData }) {
           initial={{ opacity: 0, scale: 0.85, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           transition={{ duration: 0.9, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-          className="flex-shrink-0"
+          className="flex-shrink-0 w-full max-w-[400px]"
         >
-          <div className="relative">
+          <div className="relative w-full">
             <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-primary/15 to-primary/5 blur-2xl" />
             <div className="absolute -inset-1 rounded-[2rem] bg-gradient-to-br from-primary/20 to-transparent" />
             <img
               src="https://i.postimg.cc/Hsjjj4TD/Round-Photo-Apr192026-193207.png"
               alt="Dr Barkot Ali Child Specialist Khulna"
-              className="relative h-72 w-72 rounded-[2rem] object-cover shadow-2xl ring-1 ring-primary/10 sm:h-80 sm:w-80 lg:h-[400px] lg:w-[400px]"
+              className="relative w-full max-w-[400px] h-auto rounded-[2rem] object-cover shadow-2xl ring-1 ring-primary/10"
             />
           </div>
         </motion.div>
